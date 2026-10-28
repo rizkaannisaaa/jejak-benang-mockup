@@ -1,0 +1,1131 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jejak Benang 2035 — Mockup Interaktif</title>
+<meta name="description" content="Mockup interaktif Jejak Benang 2035: Immersive Carbon-Aware Shopping untuk fashion berkelanjutan. Data simulasi.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+html,body{margin:0;height:100%;background:#ECE8E0;font-family:'Plus Jakarta Sans',system-ui,sans-serif}
+#stage{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+#fit{width:460px;height:940px;flex:none;transform-origin:center center}
+button{font-family:inherit}
+button:focus-visible,a:focus-visible{outline:3px solid #F4A93B;outline-offset:2px}
+*::-webkit-scrollbar{display:none}
+.note{position:fixed;left:0;right:0;bottom:8px;text-align:center;font-size:12px;color:#5D6270;pointer-events:none}
+@media (max-height:700px){.note{display:none}}
+</style>
+</head>
+<body>
+<div id="stage"><div id="fit"><div id="app"></div></div></div>
+<div class="note">Mockup UTS · Jejak Benang 2035 · semua angka, merek, dan harga adalah data simulasi</div>
+<script type="module">
+import { html, render, Component } from 'https://cdn.jsdelivr.net/npm/htm@3.1.1/preact/standalone.module.js';
+class App extends Component {
+constructor(props) {
+super(props);
+this.state = this.initial(props.start);
+}
+initial(start) {
+const hist = [
+{ t: 'Memilih kemeja katun organik', s: '±4,3 kg CO₂e dihindari', p: '+20' },
+{ t: 'Menonton Carbon Journey', s: 'Kemeja Oxford Indigo · 5 babak', p: '' },
+{ t: 'Memindai Kemeja Oxford Indigo', s: 'Rupa Tenun · Majalaya', p: '' }
+];
+const done = [true, true, true, true, true];
+const base = { screen: 'home', phase: 'aim', stage: -1, ch: 0, t: 0, playing: false, counted: false, watched: [false, false, false, false, false], pick: 'org', bought: 'org', sheet: '', points: 120, saved: 8.4, scans: 0, journeys: 0, orgBuys: 0, history: [], liked: false, torch: false, remind: true, dye: false, truck: false, swap: false, audit: false, toast: '', from: 'home' };
+const presets = {
+scan: { screen: 'scan' },
+scanned: { screen: 'scan', phase: 'found', scans: 1, history: hist.slice(2) },
+product: { screen: 'product', stage: 1, from: 'scan', scans: 1, history: hist.slice(2) },
+proof: { screen: 'product', sheet: 'proof', from: 'scan', scans: 1, history: hist.slice(2) },
+journey: { screen: 'journey', ch: 1, t: 45, watched: [true, false, false, false, false], scans: 1, history: hist.slice(2) },
+compare: { screen: 'compare', scans: 1, journeys: 1, watched: done, counted: true, history: hist.slice(1) },
+success: { screen: 'success', points: 140, saved: 12.7, scans: 1, journeys: 1, orgBuys: 1, watched: done, counted: true, history: hist },
+impact: { screen: 'impact', points: 140, saved: 12.7, scans: 1, journeys: 1, orgBuys: 1, watched: done, counted: true, history: hist },
+brand: { screen: 'brand', points: 140, saved: 12.7, scans: 1, journeys: 1, orgBuys: 1, watched: done, counted: true, history: hist, dye: true }
+};
+return Object.assign(base, presets[start] || {});
+}
+componentDidMount() { this.iv = setInterval(() => this.tick(), 200); }
+componentWillUnmount() { clearInterval(this.iv); clearTimeout(this.tt); clearTimeout(this.st); }
+componentDidUpdate(prev) { if (prev.start !== this.props.start) this.setState(this.initial(this.props.start)); }
+tick() {
+const s = this.state;
+if (s.screen !== 'journey' || !s.playing) return;
+if (s.t + 2 < 100) { this.setState({ t: s.t + 2 }); return; }
+this.advance();
+}
+advance() {
+const s = this.state;
+const watched = s.watched.slice();
+watched[s.ch] = true;
+if (s.ch < 4) { this.setState({ ch: s.ch + 1, t: 0, watched }); return; }
+this.setState(Object.assign({ t: 100, playing: false, watched }, this.countJourney(s)));
+}
+countJourney(s) {
+if (s.counted) return {};
+return { counted: true, journeys: s.journeys + 1, history: [{ t: 'Menonton Carbon Journey', s: 'Kemeja Oxford Indigo · 5 babak', p: '' }].concat(s.history) };
+}
+toast(msg) {
+this.setState({ toast: msg });
+clearTimeout(this.tt);
+this.tt = setTimeout(() => this.setState({ toast: '' }), 2400);
+}
+go(screen, extra) { this.setState(Object.assign({ screen, sheet: '' }, extra || {})); }
+num(x) { return x.toFixed(1).replace('.', ','); }
+num2(x) { return x.toFixed(2).replace('.', ','); }
+renderVals() {
+const s = this.state;
+const v = {};
+['home', 'scan', 'product', 'journey', 'compare', 'success', 'impact', 'brand'].forEach(n => {
+const on = s.screen === n;
+v[n] = { op: on ? 1 : 0, vis: on ? 'visible' : 'hidden', pe: on ? 'auto' : 'none', tf: on ? 'none' : 'translateY(14px) scale(0.985)' };
+});
+const sheet = (k) => {
+const on = s.sheet === k;
+return { op: on ? 1 : 0, pe: on ? 'auto' : 'none', tf: on ? 'translateY(0)' : 'translateY(105%)', vis: on ? 'visible' : 'hidden' };
+};
+const stageData = [
+{ name: 'Kapas organik', short: 'Kapas', kg: 1.87, pct: 34, color: '#1B2766', note: 'Ditanam tanpa pestisida sintetis. Air irigasi menjadi penyumbang emisi terbesar di tahap ini.' },
+{ name: 'Tenun & celup', short: 'Celup', kg: 1.65, pct: 30, color: '#3F57AE', note: 'Ditenun di Majalaya dengan pewarna indigo alami. Air bekas celup diolah lalu dipakai ulang.' },
+{ name: 'Pengiriman', short: 'Kirim', kg: 0.66, pct: 12, color: '#F4A93B', note: 'Dikirim dengan truk dari Majalaya ke gudang Bandung, sekitar 32 km.' },
+{ name: 'Pakai & cuci', short: 'Cuci', kg: 0.88, pct: 16, color: '#8FA3DF', note: 'Perkiraan untuk 50 kali cuci. Cuci air dingin dan jemur matahari memangkas tahap ini.' },
+{ name: 'Akhir pakai', short: 'Akhir', kg: 0.44, pct: 8, color: '#C7D0EE', note: 'Bisa dikembalikan lewat program tukar baju untuk dipakai ulang atau didaur ulang.' }
+];
+const chap = [
+{ title: 'Ladang kapas organik', text: 'Serat kemeja ini tumbuh di ladang kapas organik. Tahap ini menyumbang 34% jejak karbonnya, terutama dari air irigasi.', cx: 182, cy: 236 },
+{ title: 'Tenun & pencelupan', text: 'Kain ditenun dan dicelup indigo alami di Majalaya. Air bekas celup diolah lalu dipakai ulang, jadi emisinya lebih rendah.', cx: 30, cy: 372 },
+{ title: 'Perjalanan ke toko', text: 'Truk membawa kemeja ini sekitar 32 km ke gudang Bandung. Jarak yang pendek membuat tahap ini hanya 12% dari total.', cx: 196, cy: 322 },
+{ title: 'Dipakai & dicuci', text: 'Setiap cucian air panas menambah emisi. Cuci air dingin dan jemur di bawah matahari agar tahap ini tetap kecil.', cx: 30, cy: 230 },
+{ title: 'Babak baru: tukar baju', text: 'Saat bosan, kembalikan kemeja ini ke program tukar baju. Pakaian dipakai ulang, bukan berakhir di TPA.', cx: 196, cy: 380 }
+];
+const toastOn = !!s.toast;
+const ph = s.phase;
+const found = ph === 'found';
+const finished = s.ch === 4 && s.t >= 100;
+const org = s.pick === 'org';
+const boughtOrg = s.bought === 'org';
+const rewardDefs = [
+{ title: 'Tukar 1 pakaian gratis', sub: 'Program tukar baju mitra', cost: 100, letter: 'T', tint: '#E5F0E8', ink: '#1D6B3F' },
+{ title: 'Diskon jahit ulang 25%', sub: 'Penjahit mitra di Bandung', cost: 150, letter: 'J', tint: '#E8EBF6', ink: '#283B8E' },
+{ title: 'Adopsi 1 tanaman kapas', sub: 'Koperasi petani organik', cost: 250, letter: 'K', tint: '#FBEBD3', ink: '#9A5A12' }
+];
+const next = rewardDefs.find(r => r.cost > s.points);
+const simDefs = [
+{ key: 'dye', label: 'Pewarna alami', cut: 0.9 },
+{ key: 'truck', label: 'Truk listrik', cut: 0.3 },
+{ key: 'swap', label: 'Program tukar baju', cut: 0.4 }
+];
+let simKg = 5.5;
+simDefs.forEach(d => { if (s[d.key]) simKg -= d.cut; });
+const noChange = !simDefs.some(d => s[d.key]);
+const simGrade = simKg < 5 ? 'A' : 'B';
+const cards = [
+{ name: 'Kemeja Oxford Indigo', brand: 'Rupa Tenun', kg: '5,5', grade: 'B', gc: '#3C7F4D', gt: '#FFFFFF', bg: '#E6E9F4', price: 'Rp 389.000', isShirt: true, isChino: false, isTee: false, isJacket: false, full: true },
+{ name: 'Chino Katun Organik', brand: 'Lembar Studio', kg: '4,1', grade: 'A', gc: '#1D6B3F', gt: '#FFFFFF', bg: '#F1EBDD', price: 'Rp 429.000', isShirt: false, isChino: true, isTee: false, isJacket: false },
+{ name: 'Kaus Serat Bambu', brand: 'Akar Kain', kg: '2,3', grade: 'A', gc: '#1D6B3F', gt: '#FFFFFF', bg: '#E7EFE5', price: 'Rp 189.000', isShirt: false, isChino: false, isTee: true, isJacket: false },
+{ name: 'Jaket Denim Daur Ulang', brand: 'Ulang Denim', kg: '8,1', grade: 'C', gc: '#E2B33C', gt: '#14171F', bg: '#E3E9F1', price: 'Rp 549.000', isShirt: false, isChino: false, isTee: false, isJacket: true }
+].map(c => Object.assign({}, c, { open: c.full ? () => this.go('product', { from: 'home', stage: -1 }) : () => this.toast('Prototipe ini menampilkan detail lengkap untuk Kemeja Oxford Indigo') }));
+const goJourneyAt = (i) => () => this.go('journey', { ch: i, t: 0, playing: true, counted: s.counted });
+return {
+scr: v,
+sh: { proof: sheet('proof'), why: sheet('why') },
+homeBar: s.screen === 'scan' || s.screen === 'journey' ? '#FFFFFF' : '#14171F',
+toast: { op: toastOn ? 1 : 0, tf: toastOn ? 'translateY(0)' : 'translateY(-10px)', text: s.toast },
+points: s.points,
+scans: s.scans,
+journeys: s.journeys,
+orgBuys: s.orgBuys,
+savedText: this.num(s.saved),
+cards,
+goHome: () => this.go('home'),
+goScan: () => this.go('scan', { phase: 'aim' }),
+goImpact: () => this.go('impact'),
+goBrand: () => this.go('brand'),
+goCompare: () => this.go('compare'),
+bell: () => this.toast('Belum ada notifikasi baru'),
+seeAll: () => this.toast('Katalog lengkap tidak termasuk dalam prototipe ini'),
+ret: ph === 'aim' ? { l: '56px', t: '166px', w: '281px', h: '384px', c: '#FFFFFF', op: 1 } : { l: '72px', t: '196px', w: '249px', h: '330px', c: '#F4A93B', op: found ? 0 : 1 },
+beam: { top: ph === 'aim' ? '200px' : '508px', op: ph === 'lock' ? 1 : 0 },
+tags: { op: found ? 1 : 0, tf: found ? 'scale(1)' : 'scale(0.92)' },
+cam: { op: found ? 0 : 1, pe: found ? 'none' : 'auto' },
+found: { tf: found ? 'translateY(0)' : 'translateY(110%)' },
+scanHint: ph === 'aim' ? 'Arahkan ke pakaian' : ph === 'lock' ? 'Mengenali pakaian…' : 'Kemeja dikenali',
+scanDot: ph === 'aim' ? '#FFFFFF' : ph === 'lock' ? '#F4A93B' : '#5FD38A',
+shutterIn: ph === 'lock' ? '#F4A93B' : '#FFFFFF',
+shutterTf: ph === 'lock' ? 'scale(0.82)' : 'scale(1)',
+torch: s.torch,
+torchBg: s.torch ? '#F4A93B' : 'rgba(20, 20, 22, 0.45)',
+torchFg: s.torch ? '#14171F' : '#FFFFFF',
+torchGlow: s.torch ? 0.14 : 0,
+toggleTorch: () => this.setState({ torch: !s.torch }),
+gallery: () => this.toast('Pilih foto label dari galeri (tidak aktif di prototipe)'),
+flip: () => this.toast('Kamera depan tidak dipakai untuk memindai'),
+shoot: () => {
+if (s.phase !== 'aim') return;
+this.setState({ phase: 'lock' });
+clearTimeout(this.st);
+this.st = setTimeout(() => {
+const n = this.state;
+this.setState({ phase: 'found', scans: n.scans + 1, history: [{ t: 'Memindai Kemeja Oxford Indigo', s: 'Rupa Tenun · Majalaya', p: '' }].concat(n.history) });
+}, 1400);
+},
+rescan: () => this.setState({ phase: 'aim' }),
+closeScan: () => this.go('home', { phase: 'aim' }),
+goProductScan: () => this.go('product', { from: 'scan', stage: -1 }),
+backProduct: () => this.go(s.from === 'scan' ? 'scan' : 'home'),
+liked: s.liked,
+likeFill: s.liked ? '#E0533D' : 'none',
+likeStroke: s.liked ? '#E0533D' : '#14171F',
+toggleLike: () => { this.setState({ liked: !s.liked }); if (!s.liked) this.toast('Disimpan ke favorit'); },
+share: () => this.toast('Tautan produk disalin'),
+openProof: () => this.setState({ sheet: 'proof' }),
+openWhy: () => this.setState({ sheet: 'why' }),
+closeSheet: () => this.setState({ sheet: '' }),
+stages: stageData.map((d, i) => ({
+name: d.name, color: d.color, note: d.note, pct: d.pct + '%', kg: this.num2(d.kg),
+open: s.stage === i,
+dim: s.stage < 0 || s.stage === i ? 1 : 0.3,
+rowBg: s.stage === i ? '#F3F5FC' : 'transparent',
+chev: s.stage === i ? 'rotate(90deg)' : 'none',
+toggle: () => this.setState({ stage: s.stage === i ? -1 : i }),
+play: goJourneyAt(i)
+})),
+journeyCta: s.stage >= 0 ? 'Putar babak ' + stageData[s.stage].short : 'Carbon Journey',
+goJourney: goJourneyAt(s.stage >= 0 ? s.stage : 0),
+jsc: { s0: s.ch === 0 ? 1 : 0, s1: s.ch === 1 ? 1 : 0, s2: s.ch === 2 ? 1 : 0, s3: s.ch === 3 ? 1 : 0, s4: s.ch === 4 ? 1 : 0 },
+segs: chap.map((c, i) => ({
+w: (i < s.ch ? 100 : i === s.ch ? s.t : 0) + '%',
+aria: 'Babak ' + (i + 1) + ': ' + stageData[i].short,
+go: () => this.setState({ ch: i, t: 0, playing: true })
+})),
+cur: { num: s.ch + 1, title: chap[s.ch].title, text: chap[s.ch].text, kg: this.num2(stageData[s.ch].kg), pct: stageData[s.ch].pct + '%', cx: chap[s.ch].cx + 'px', cy: chap[s.ch].cy + 'px' },
+showPause: s.playing,
+showPlay: !s.playing,
+playLabel: s.playing ? 'Jeda narasi' : 'Putar narasi',
+togglePlay: () => {
+if (finished) { this.setState({ ch: 0, t: 0, playing: true }); return; }
+this.setState({ playing: !s.playing });
+},
+jPrev: () => {
+if (s.t > 15) { this.setState({ t: 0 }); return; }
+this.setState({ ch: Math.max(0, s.ch - 1), t: 0 });
+},
+jNext: () => this.advance(),
+isLast: s.ch === 4,
+notLast: s.ch < 4,
+journeyToCompare: () => {
+const watched = s.watched.slice();
+watched[4] = true;
+this.setState(Object.assign({ screen: 'compare', sheet: '', playing: false, watched }, this.countJourney(s)));
+},
+backJourney: () => this.go('product', { playing: false }),
+vr: () => this.toast('Pasang headset VR untuk mode imersif penuh'),
+backCompare: () => this.go('product'),
+cmpOrg: { on: org, border: org ? '2px solid #283B8E' : '1px solid #E6E1D8' },
+cmpPoly: { on: !org, border: org ? '1px solid #E6E1D8' : '2px solid #283B8E' },
+pickOrg: () => this.setState({ pick: 'org' }),
+pickPoly: () => this.setState({ pick: 'poly' }),
+diff: [['Bahan baku', 1.87, 3.97], ['Tenun & celup', 1.65, 3.25], ['Pengiriman', 0.66, 0.66], ['Pakai & cuci', 0.88, 0.88], ['Akhir pakai', 0.44, 1.04]].map(r => ({ name: r[0], a: Math.round(r[1] / 3.97 * 100) + '%', b: Math.round(r[2] / 3.97 * 100) + '%', av: this.num2(r[1]), bv: this.num2(r[2]) })),
+pickName: org ? 'Oxford' : 'Basic Print',
+pickPrice: org ? 'Rp 389.000' : 'Rp 159.000',
+pickHint: org ? '+20 Carbon Points' : 'Tanpa Carbon Points',
+pickHintColor: org ? '#1D6B3F' : '#5D6270',
+buy: () => {
+const o = s.pick === 'org';
+this.setState({
+screen: 'success', sheet: '', bought: s.pick,
+points: s.points + (o ? 20 : 0),
+saved: Math.round((s.saved + (o ? 4.3 : 0)) * 10) / 10,
+orgBuys: s.orgBuys + (o ? 1 : 0),
+history: [{ t: o ? 'Memilih kemeja katun organik' : 'Memilih kemeja poliester', s: o ? '±4,3 kg CO₂e dihindari' : 'Tips perawatan dikirim', p: o ? '+20' : '' }].concat(s.history)
+});
+},
+boughtOrg,
+boughtPoly: !boughtOrg,
+succ: boughtOrg
+? { ring: '#1D6B3F', title: 'Pilihan yang lebih ringan!', text: 'Pesanan Kemeja Oxford Indigo sudah dibuat. Terima kasih sudah memilih dengan sadar.', product: 'Kemeja Oxford Indigo · M', ship: 'Dikirim dari Majalaya · 2–3 hari', price: 'Rp 389.000', shirt: '#3B55A8', thumbBg: '#E6E9F4' }
+: { ring: '#283B8E', title: 'Pesanan dibuat', text: 'Pesanan Kemeja Basic Print sudah dibuat. Ini beberapa cara agar dampaknya tetap kecil.', product: 'Kemeja Basic Print · M', ship: 'Dikirim dari gudang impor · 5–7 hari', price: 'Rp 159.000', shirt: '#D96A4F', thumbBg: '#F6E5DE' },
+remind: s.remind,
+sw: { bg: s.remind ? '#283B8E' : '#CFC9BE', tf: s.remind ? 'translateX(20px)' : 'none' },
+toggleRemind: () => { this.setState({ remind: !s.remind }); this.toast(s.remind ? 'Pengingat dimatikan' : 'Kami akan mengingatkanmu dalam 6 bulan'); },
+nextPct: (next ? Math.min(100, Math.round(s.points / next.cost * 100)) : 100) + '%',
+nextText: next ? 'Kurang ' + (next.cost - s.points) + ' poin untuk “' + next.title + '”' : 'Semua hadiah bisa ditukar',
+rewards: rewardDefs.map(r => {
+const can = s.points >= r.cost;
+return Object.assign({}, r, {
+label: r.cost + ' poin',
+btnBg: can ? '#283B8E' : '#ECE8E0',
+btnFg: can ? '#FFFFFF' : '#5D6270',
+redeem: () => {
+if (!can) { this.toast('Poin belum cukup untuk hadiah ini'); return; }
+this.setState({ points: s.points - r.cost, history: [{ t: 'Menukar: ' + r.title, s: 'Voucher dikirim ke email', p: '−' + r.cost }].concat(s.history) });
+this.toast('Voucher berhasil ditukar');
+}
+});
+}),
+hasHistory: s.history.length > 0,
+noHistory: s.history.length === 0,
+hist: s.history.slice(0, 5).map((h, i, a) => ({
+t: h.t, s: h.s, p: h.p,
+pc: h.p.charAt(0) === '+' ? '#1D6B3F' : '#9E2F23',
+dot: h.p.charAt(0) === '+' ? '#1D6B3F' : h.p ? '#9E2F23' : '#283B8E',
+line: i < a.length - 1 ? '1px solid #F1EEE7' : 'none'
+})),
+scanTotal: (12480 + s.scans).toLocaleString('id-ID'),
+orgTotal: (3210 + s.orgBuys).toLocaleString('id-ID'),
+journeyTotal: (2140 + s.journeys).toLocaleString('id-ID'),
+chRows: [['Kapas', 42], ['Tenun & celup', 26], ['Pengiriman', 15], ['Pakai & cuci', 13], ['Akhir pakai', 34]].map((r, i) => ({ n: r[0], sec: r[1], w: Math.round(r[1] / 42 * 100) + '%', you: s.watched[i] })),
+sim: simDefs.map(d => {
+const on = s[d.key];
+return {
+label: (on ? '✓ ' : '+ ') + d.label, on,
+bg: on ? '#F4A93B' : 'transparent',
+fg: on ? '#14171F' : '#FFFFFF',
+border: on ? '1px solid #F4A93B' : '1px solid #4A5068',
+toggle: () => this.setState({ [d.key]: !on, audit: false })
+};
+}),
+simKg: this.num(simKg),
+simGrade,
+simGradeBg: simGrade === 'A' ? '#1D6B3F' : '#3C7F4D',
+auditOpen: !s.audit,
+auditSent: s.audit,
+auditBg: noChange ? '#6B6F7C' : '#FFFFFF',
+auditLabel: noChange ? 'Pilih perubahan untuk disimulasikan' : 'Ajukan audit ulang untuk skor baru',
+sendAudit: () => {
+if (noChange) { this.toast('Aktifkan minimal satu perubahan dulu'); return; }
+this.setState({ audit: true });
+this.toast('Permintaan audit terkirim ke verifikator');
+}
+};
+}
+render() {
+const V = this.renderVals();
+return html`<div style="width: 460px; height: 940px; position: relative; overflow: hidden; background: #ECE8E0; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: #14171F">
+<div style="position: absolute; left: 19px; top: 30px; width: 421px; height: 880px; border-radius: 66px; padding: 4px; box-sizing: border-box; background: linear-gradient(150deg, #5C5F68 0%, #26272C 36%, #4B4D54 68%, #2A2B30 100%); box-shadow: 0 50px 80px -34px rgba(20, 23, 31, 0.55), 0 18px 34px -18px rgba(20, 23, 31, 0.4)">
+<div style="position: absolute; left: -3px; top: 156px; width: 3px; height: 30px; border-radius: 2px 0 0 2px; background: #3A3B41"></div>
+<div style="position: absolute; left: -3px; top: 214px; width: 3px; height: 58px; border-radius: 2px 0 0 2px; background: #3A3B41"></div>
+<div style="position: absolute; left: -3px; top: 284px; width: 3px; height: 58px; border-radius: 2px 0 0 2px; background: #3A3B41"></div>
+<div style="position: absolute; right: -3px; top: 236px; width: 3px; height: 92px; border-radius: 0 2px 2px 0; background: #3A3B41"></div>
+<div style="width: 413px; height: 872px; border-radius: 62px; padding: 10px; box-sizing: border-box; background: #07080A">
+<div style="position: relative; width: 393px; height: 852px; border-radius: 52px; overflow: hidden; background: #F7F5F0">
+
+
+<div style="position: absolute; inset: 0; background: #F7F5F0; opacity: ${V.scr.home.op}; visibility: ${V.scr.home.vis}; pointer-events: ${V.scr.home.pe}; transform: ${V.scr.home.tf}; transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s">
+<div style="position: absolute; left: 0; right: 0; top: 0; bottom: 84px; overflow-y: auto; scrollbar-width: none; padding: 60px 20px 24px; box-sizing: border-box">
+
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="width: 44px; height: 44px; border-radius: 22px; background: linear-gradient(135deg, #F4A93B, #D9703A); color: #FFFFFF; font-weight: 800; font-size: 15px; display: flex; align-items: center; justify-content: center">NA</div>
+<div style="flex: 1; min-width: 0">
+<div style="font-size: 13px; color: #5D6270">Selamat pagi,</div>
+<div style="font-size: 18px; font-weight: 800; letter-spacing: -0.01em">Nadia</div>
+</div>
+<button onClick="${V.goImpact}" aria-label="Carbon Points, buka Dampakku" style="height: 40px; padding: 0 14px 0 10px; border-radius: 20px; border: 1px solid #E6E1D8; background: #FFFFFF; display: flex; align-items: center; gap: 7px; font-family: inherit; font-size: 14px; font-weight: 800; color: #14171F; cursor: pointer">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#F4A93B"></circle><circle cx="12" cy="12" r="6.5" fill="none" stroke="#FFF3DC" stroke-width="1.6"></circle><path d="M9.5 12.5l2 2 3.5-4" fill="none" stroke="#FFF3DC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+${V.points}</button>
+<button onClick="${V.bell}" aria-label="Notifikasi" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid #E6E1D8; background: #FFFFFF; color: #14171F; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9a6 6 0 0112 0c0 6 2.5 7.5 2.5 7.5h-17S6 15 6 9z"></path><path d="M10 20a2 2 0 004 0"></path></svg>
+</button>
+</div>
+
+<div style="margin-top: 18px; height: 50px; border-radius: 16px; border: 1px solid #E6E1D8; background: #FFFFFF; display: flex; align-items: center; gap: 10px; padding: 0 6px 0 16px">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5D6270" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4"></path></svg>
+<span style="flex: 1; font-size: 14px; color: #6B707D">Cari pakaian, merek, bahan</span>
+<button onClick="${V.goScan}" aria-label="Pindai dengan kamera" style="width: 38px; height: 38px; border-radius: 12px; border: none; background: #F1EEE7; color: #283B8E; display: flex; align-items: center; justify-content: center; cursor: pointer">
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 8V6a2 2 0 012-2h2M16 4h2a2 2 0 012 2v2M20 16v2a2 2 0 01-2 2h-2M8 20H6a2 2 0 01-2-2v-2M7 12h10"></path></svg>
+</button>
+</div>
+
+<div style="position: relative; margin-top: 18px; height: 222px; border-radius: 26px; overflow: hidden; background: linear-gradient(135deg, #18235F 0%, #283B8E 55%, #3C58BC 100%)">
+<svg aria-hidden="true" style="position: absolute; left: 0; bottom: 0" width="353" height="196" viewBox="0 0 353 196">
+<defs>
+<pattern id="heroTw" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(38)"><line x1="0" y1="0" x2="0" y2="7" stroke="#FFFFFF" stroke-opacity="0.06" stroke-width="2"></line></pattern>
+<linearGradient id="heroSpool" x1="0" x2="1"><stop offset="0" stop-color="#C79A62"></stop><stop offset="0.5" stop-color="#E5C08C"></stop><stop offset="1" stop-color="#B58450"></stop></linearGradient>
+<linearGradient id="heroThread" x1="0" x2="1"><stop offset="0" stop-color="#F4A93B"></stop><stop offset="0.5" stop-color="#FFD08A"></stop><stop offset="1" stop-color="#E08E25"></stop></linearGradient>
+</defs>
+<rect width="353" height="196" fill="url(#heroTw)"></rect>
+<circle cx="300" cy="40" r="80" fill="#FFFFFF" fill-opacity="0.05"></circle>
+<path d="M-10 170 C60 150 110 196 170 176 S260 120 300 132" fill="none" stroke="#F4A93B" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="1 7"></path>
+<ellipse cx="292" cy="182" rx="44" ry="7" fill="#000000" fill-opacity="0.25"></ellipse>
+<rect x="262" y="96" width="60" height="10" rx="3" fill="url(#heroSpool)"></rect>
+<rect x="268" y="106" width="48" height="66" fill="url(#heroThread)"></rect>
+<path d="M268 116 h48 M268 128 h48 M268 140 h48 M268 152 h48 M268 164 h48" stroke="#C97A16" stroke-opacity="0.45" stroke-width="1.2"></path>
+<rect x="262" y="172" width="60" height="10" rx="3" fill="url(#heroSpool)"></rect>
+<path d="M316 130 C330 128 336 120 330 110" fill="none" stroke="#FFD08A" stroke-width="2.5" stroke-linecap="round"></path>
+</svg>
+<div style="position: relative; padding: 18px 18px 0; display: flex; flex-direction: column; gap: 8px; max-width: 210px">
+<span style="align-self: flex-start; padding: 5px 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.14); color: #FFFFFF; font-size: 11px; font-weight: 700; letter-spacing: 0.02em">BARU · AR + VR</span>
+<div style="font-size: 21px; line-height: 1.2; font-weight: 800; color: #FFFFFF; letter-spacing: -0.02em">Lihat cerita di balik pakaianmu</div>
+<div style="font-size: 13px; line-height: 1.4; color: #CBD3F2">Asal serat, prosesnya, sampai jejak karbonnya.</div>
+</div>
+<button onClick="${V.goScan}" style="position: absolute; left: 18px; bottom: 16px; height: 44px; padding: 0 18px 0 14px; border-radius: 22px; border: none; background: #F4A93B; color: #14171F; font-family: inherit; font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 8px; cursor: pointer">
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 8V6a2 2 0 012-2h2M16 4h2a2 2 0 012 2v2M20 16v2a2 2 0 01-2 2h-2M8 20H6a2 2 0 01-2-2v-2M7 12h10"></path></svg>
+Pindai sekarang</button>
+</div>
+
+<button onClick="${V.goImpact}" style="margin-top: 14px; width: 100%; padding: 14px; border-radius: 20px; border: 1px solid #E6E1D8; background: #FFFFFF; display: flex; align-items: center; gap: 12px; text-align: left; font-family: inherit; color: #14171F; cursor: pointer">
+<div style="width: 44px; height: 44px; border-radius: 14px; background: #E5F0E8; color: #1D6B3F; display: flex; align-items: center; justify-content: center; flex: none">
+<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-14 15-15-1 10-7 15-15 15z"></path><path d="M5 19l7-7"></path></svg>
+</div>
+<div style="flex: 1; min-width: 0">
+<div style="font-size: 12px; color: #5D6270">Dampakmu bulan ini</div>
+<div style="font-size: 15px; font-weight: 800">${V.savedText} kg CO₂e dihindari</div>
+<div style="font-size: 12px; color: #5D6270">${V.scans} pemindaian · ${V.journeys} perjalanan ditonton</div>
+</div>
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5D6270" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+
+<div style="margin-top: 22px; display: flex; align-items: baseline; justify-content: space-between">
+<h2 style="margin: 0; font-size: 17px; font-weight: 800; letter-spacing: -0.01em">Pilihan rendah karbon</h2>
+<button onClick="${V.seeAll}" style="border: none; background: transparent; padding: 8px 0; font-family: inherit; font-size: 13px; font-weight: 700; color: #283B8E; cursor: pointer">Lihat semua</button>
+</div>
+<div style="margin: 8px -20px 0; padding: 0 20px 4px; display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none">
+${V.cards.map((c) => html`
+<button onClick="${c.open}" style="flex: none; width: 160px; padding: 8px; border-radius: 22px; border: 1px solid #ECE7DE; background: #FFFFFF; display: flex; flex-direction: column; gap: 8px; text-align: left; font-family: inherit; color: #14171F; cursor: pointer">
+<div style="position: relative; height: 150px; border-radius: 16px; background: ${c.bg}; display: flex; align-items: center; justify-content: center; overflow: hidden">
+${c.isShirt ? html`
+<svg aria-hidden="true" width="104" height="122" viewBox="0 0 240 280"><defs><linearGradient id="hcSg" x1="0" x2="1"><stop offset="0" stop-color="#2A3D86"></stop><stop offset="0.5" stop-color="#4863B8"></stop><stop offset="1" stop-color="#26397E"></stop></linearGradient></defs><path d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="url(#hcSg)"></path><path d="M82 28 Q120 14 158 28 L162 30 L120 46 L78 30 Z" fill="#1E2C66"></path><path d="M78 30 L120 46 L106 70 L84 54 Z" fill="#3B55A8"></path><path d="M162 30 L120 46 L134 70 L156 54 Z" fill="#3651A2"></path><line x1="120" y1="52" x2="120" y2="266" stroke="#1E2C66" stroke-width="2"></line><circle cx="124" cy="90" r="3.5" fill="#E8E3D8"></circle><circle cx="124" cy="130" r="3.5" fill="#E8E3D8"></circle><circle cx="124" cy="170" r="3.5" fill="#E8E3D8"></circle><circle cx="124" cy="210" r="3.5" fill="#E8E3D8"></circle><path d="M194 112 L192 262 L180 262 L186 120 Z" fill="#000000" fill-opacity="0.13"></path><path d="M46 112 L48 262 L60 262 L54 120 Z" fill="#000000" fill-opacity="0.13"></path></svg>
+` : null}
+${c.isChino ? html`
+<svg aria-hidden="true" width="84" height="124" viewBox="0 0 200 290"><defs><linearGradient id="hcCg" x1="0" x2="1"><stop offset="0" stop-color="#B49C6E"></stop><stop offset="0.5" stop-color="#D2BD92"></stop><stop offset="1" stop-color="#AA915F"></stop></linearGradient></defs><path d="M40 20 H160 L172 270 Q150 280 122 272 L104 96 L96 96 L78 272 Q50 280 28 270 Z" fill="url(#hcCg)"></path><rect x="40" y="12" width="120" height="20" rx="3" fill="#A58B5A"></rect><path d="M60 12 v20 M100 12 v20 M140 12 v20" stroke="#8C7448" stroke-width="3"></path><path d="M44 40 Q60 70 82 46" fill="none" stroke="#8C7448" stroke-width="2"></path><path d="M156 40 Q140 70 118 46" fill="none" stroke="#8C7448" stroke-width="2"></path><path d="M100 32 V96" stroke="#8C7448" stroke-width="2"></path><path d="M122 272 L104 96 L112 96 L132 272 Z" fill="#000000" fill-opacity="0.12"></path></svg>
+` : null}
+${c.isTee ? html`
+<svg aria-hidden="true" width="110" height="114" viewBox="0 0 200 210"><defs><linearGradient id="hcTg" x1="0" x2="1"><stop offset="0" stop-color="#7E9C7B"></stop><stop offset="0.5" stop-color="#9FBA9B"></stop><stop offset="1" stop-color="#768F72"></stop></linearGradient></defs><path d="M70 14 Q100 34 130 14 L176 32 L198 84 L166 98 L158 76 L158 198 Q100 208 42 198 L42 76 L34 98 L2 84 L24 32 Z" fill="url(#hcTg)"></path><path d="M70 14 Q100 34 130 14 Q100 46 70 14 Z" fill="#5E7A5B"></path><path d="M158 76 L158 198 L146 198 L150 84 Z" fill="#000000" fill-opacity="0.12"></path><path d="M42 76 L42 198 L54 198 L50 84 Z" fill="#000000" fill-opacity="0.12"></path></svg>
+` : null}
+${c.isJacket ? html`
+<svg aria-hidden="true" width="110" height="118" viewBox="0 0 220 236"><defs><linearGradient id="hcJg" x1="0" x2="1"><stop offset="0" stop-color="#3F5E8C"></stop><stop offset="0.5" stop-color="#6283B4"></stop><stop offset="1" stop-color="#3A5683"></stop></linearGradient></defs><path d="M70 24 L110 40 L150 24 L190 42 Q204 50 208 66 L218 180 Q218 190 208 190 L192 190 L180 104 L178 220 Q110 230 42 220 L40 104 L28 190 L12 190 Q2 190 2 180 L12 66 Q16 50 30 42 Z" fill="url(#hcJg)"></path><path d="M70 24 L110 40 L94 66 L74 48 Z" fill="#2E4A75"></path><path d="M150 24 L110 40 L126 66 L146 48 Z" fill="#2E4A75"></path><path d="M110 40 V222" stroke="#F4A93B" stroke-width="1.5" stroke-dasharray="4 3"></path><rect x="56" y="84" width="36" height="30" rx="4" fill="none" stroke="#F4A93B" stroke-width="1.5" stroke-dasharray="4 3"></rect><rect x="128" y="84" width="36" height="30" rx="4" fill="none" stroke="#F4A93B" stroke-width="1.5" stroke-dasharray="4 3"></rect><path d="M42 200 Q110 212 178 200" fill="none" stroke="#F4A93B" stroke-width="1.5" stroke-dasharray="4 3"></path></svg>
+` : null}
+<span style="position: absolute; left: 8px; top: 8px; min-width: 28px; height: 28px; border-radius: 9px; background: ${c.gc}; color: ${c.gt}; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center">${c.grade}</span>
+</div>
+<div style="padding: 0 4px 4px; display: flex; flex-direction: column; gap: 3px">
+<span style="font-size: 11px; color: #5D6270">${c.brand}</span>
+<span style="font-size: 13px; font-weight: 700; line-height: 1.3">${c.name}</span>
+<div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px">
+<span style="font-size: 13px; font-weight: 800">${c.price}</span>
+<span style="font-size: 11px; color: #5D6270">${c.kg} kg</span>
+</div>
+</div>
+</button>
+`)}
+</div>
+
+<h2 style="margin: 22px 0 10px; font-size: 17px; font-weight: 800; letter-spacing: -0.01em">Cara kerjanya</h2>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div style="padding: 12px 10px; border-radius: 18px; background: #FFFFFF; border: 1px solid #ECE7DE; display: flex; flex-direction: column; gap: 6px"><span style="width: 28px; height: 28px; border-radius: 14px; background: #E8EBF6; color: #283B8E; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center">1</span><span style="font-size: 13px; font-weight: 700">Pindai</span><span style="font-size: 11px; color: #5D6270; line-height: 1.35">Arahkan kamera ke pakaian</span></div>
+<div style="padding: 12px 10px; border-radius: 18px; background: #FFFFFF; border: 1px solid #ECE7DE; display: flex; flex-direction: column; gap: 6px"><span style="width: 28px; height: 28px; border-radius: 14px; background: #E8EBF6; color: #283B8E; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center">2</span><span style="font-size: 13px; font-weight: 700">Jelajahi</span><span style="font-size: 11px; color: #5D6270; line-height: 1.35">Masuk ke cerita produknya</span></div>
+<div style="padding: 12px 10px; border-radius: 18px; background: #FFFFFF; border: 1px solid #ECE7DE; display: flex; flex-direction: column; gap: 6px"><span style="width: 28px; height: 28px; border-radius: 14px; background: #E8EBF6; color: #283B8E; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center">3</span><span style="font-size: 13px; font-weight: 700">Pilih</span><span style="font-size: 11px; color: #5D6270; line-height: 1.35">Dapat Carbon Points</span></div>
+</div>
+</div>
+
+<nav aria-label="Menu utama" style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(16px); border-top: 1px solid #ECE7DE; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding-bottom: 22px; box-sizing: border-box">
+<button aria-current="page" style="border: none; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-family: inherit; font-size: 11px; font-weight: 800; color: #283B8E; cursor: pointer"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"></path></svg>Beranda</button>
+<div style="display: flex; justify-content: center"><button onClick="${V.goScan}" aria-label="Pindai" style="margin-top: -22px; width: 62px; height: 62px; border-radius: 31px; border: 4px solid #F7F5F0; background: #283B8E; color: #FFFFFF; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px -8px rgba(40, 59, 142, 0.7); cursor: pointer"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 8V6a2 2 0 012-2h2M16 4h2a2 2 0 012 2v2M20 16v2a2 2 0 01-2 2h-2M8 20H6a2 2 0 01-2-2v-2M7 12h10"></path></svg></button></div>
+<button onClick="${V.goImpact}" style="border: none; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-family: inherit; font-size: 11px; font-weight: 600; color: #5D6270; cursor: pointer"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-14 15-15-1 10-7 15-15 15z"></path><path d="M5 19l7-7"></path></svg>Dampak</button>
+</nav>
+</div>
+
+
+<div style="position: absolute; inset: 0; background: #1A1814; overflow: hidden; opacity: ${V.scr.scan.op}; visibility: ${V.scr.scan.vis}; pointer-events: ${V.scr.scan.pe}; transform: ${V.scr.scan.tf}; transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s">
+<svg aria-hidden="true" style="position: absolute; inset: 0" width="393" height="852" viewBox="0 0 393 852">
+<defs>
+<linearGradient id="scWall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5E564C"></stop><stop offset="1" stop-color="#7A7064"></stop></linearGradient>
+<linearGradient id="scFloor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4A4138"></stop><stop offset="1" stop-color="#2A241F"></stop></linearGradient>
+<linearGradient id="scRail" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F0F0F2"></stop><stop offset="0.5" stop-color="#A5A7AD"></stop><stop offset="1" stop-color="#5C5E64"></stop></linearGradient>
+<radialGradient id="scSpot" cx="0.5" cy="0.42" r="0.55"><stop offset="0" stop-color="#FFF2DA" stop-opacity="0.45"></stop><stop offset="1" stop-color="#FFF2DA" stop-opacity="0"></stop></radialGradient>
+<radialGradient id="scVig" cx="0.5" cy="0.45" r="0.75"><stop offset="0.55" stop-color="#000000" stop-opacity="0"></stop><stop offset="1" stop-color="#000000" stop-opacity="0.7"></stop></radialGradient>
+<linearGradient id="scG" x1="0" x2="1"><stop offset="0" stop-color="#2A3D86"></stop><stop offset="0.5" stop-color="#4C67BC"></stop><stop offset="1" stop-color="#25387C"></stop></linearGradient>
+<pattern id="scT" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><line x1="0" y1="0" x2="0" y2="5" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="1.6"></line></pattern>
+<filter id="scBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="3.2"></feGaussianBlur></filter>
+<filter id="scSoft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="14"></feGaussianBlur></filter>
+</defs>
+<rect width="393" height="600" fill="url(#scWall)"></rect>
+<rect y="600" width="393" height="252" fill="url(#scFloor)"></rect>
+<rect y="596" width="393" height="6" fill="#3A332C"></rect>
+<g filter="url(#scBlur)">
+<rect x="22" y="200" width="6" height="400" fill="#8B8D93"></rect>
+<rect x="365" y="200" width="6" height="400" fill="#8B8D93"></rect>
+<path transform="translate(-36 214) scale(0.62)" d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="#B49A76"></path>
+<path transform="translate(4 220) scale(0.6)" d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="#6E8068"></path>
+<path transform="translate(36 224) scale(0.58)" d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="#D9CDB8"></path>
+<path transform="translate(244 224) scale(0.58)" d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="#A9573F"></path>
+<path transform="translate(276 220) scale(0.6)" d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="#E4DCCB"></path>
+<path transform="translate(310 214) scale(0.62)" d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="#3F4A63"></path>
+</g>
+<rect x="10" y="204" width="373" height="7" rx="3.5" fill="url(#scRail)"></rect>
+<rect width="393" height="852" fill="url(#scSpot)"></rect>
+<ellipse cx="206" cy="400" rx="104" ry="146" fill="#000000" fill-opacity="0.28" filter="url(#scSoft)"></ellipse>
+<g transform="translate(76 200)">
+<path d="M54 46 L120 22 L186 46" fill="none" stroke="#9A7B55" stroke-width="6" stroke-linecap="round"></path>
+<path d="M120 22 v-8 q9 -2 9 -9 q0 -7 -9 -7 q-8 0 -9 7" fill="none" stroke="#C9CCD2" stroke-width="3" stroke-linecap="round"></path>
+<path d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="url(#scG)"></path>
+<path d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="url(#scT)"></path>
+<path d="M206 50 Q214 120 216 200" fill="none" stroke="#000000" stroke-opacity="0.14" stroke-width="3"></path>
+<path d="M34 50 Q26 120 24 200" fill="none" stroke="#000000" stroke-opacity="0.14" stroke-width="3"></path>
+<path d="M194 112 L192 262 L180 262 L186 120 Z" fill="#000000" fill-opacity="0.14"></path>
+<path d="M46 112 L48 262 L60 262 L54 120 Z" fill="#000000" fill-opacity="0.14"></path>
+<path d="M82 28 Q120 14 158 28 L162 30 L120 46 L78 30 Z" fill="#1E2C66"></path>
+<path d="M78 30 L120 46 L106 70 L84 54 Z" fill="#3B55A8"></path>
+<path d="M162 30 L120 46 L134 70 L156 54 Z" fill="#3651A2"></path>
+<path d="M106 70 L120 46 L134 70 L120 62 Z" fill="#000000" fill-opacity="0.2"></path>
+<rect x="114" y="54" width="12" height="210" fill="#000000" fill-opacity="0.07"></rect>
+<line x1="120" y1="54" x2="120" y2="266" stroke="#1E2C66" stroke-width="1"></line>
+<circle cx="123" cy="86" r="3" fill="#E8E3D8"></circle><circle cx="123" cy="118" r="3" fill="#E8E3D8"></circle><circle cx="123" cy="150" r="3" fill="#E8E3D8"></circle><circle cx="123" cy="182" r="3" fill="#E8E3D8"></circle><circle cx="123" cy="214" r="3" fill="#E8E3D8"></circle><circle cx="123" cy="246" r="3" fill="#E8E3D8"></circle>
+<path d="M64 100 h36 v36 q-18 7 -36 0 z" fill="none" stroke="#1E2C66" stroke-opacity="0.6" stroke-width="1.5"></path>
+<path d="M48 262 Q120 274 192 262 L192 254 Q120 266 48 254 Z" fill="#000000" fill-opacity="0.12"></path>
+<path d="M120 46 L162 30 L176 40 L140 72 Z" fill="#FFFFFF" fill-opacity="0.07"></path>
+</g>
+<rect width="393" height="852" fill="#FFF3D6" fill-opacity="${V.torchGlow}"></rect>
+<rect width="393" height="852" fill="url(#scVig)"></rect>
+</svg>
+
+<div style="position: absolute; left: ${V.ret.l}; top: ${V.ret.t}; width: ${V.ret.w}; height: ${V.ret.h}; opacity: ${V.ret.op}; transition: all 0.5s cubic-bezier(0.2, 0.8, 0.2, 1)">
+<div style="position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-left: 3px solid ${V.ret.c}; border-top: 3px solid ${V.ret.c}; border-radius: 12px 0 0 0; transition: border-color 0.3s"></div>
+<div style="position: absolute; right: 0; top: 0; width: 30px; height: 30px; border-right: 3px solid ${V.ret.c}; border-top: 3px solid ${V.ret.c}; border-radius: 0 12px 0 0; transition: border-color 0.3s"></div>
+<div style="position: absolute; left: 0; bottom: 0; width: 30px; height: 30px; border-left: 3px solid ${V.ret.c}; border-bottom: 3px solid ${V.ret.c}; border-radius: 0 0 0 12px; transition: border-color 0.3s"></div>
+<div style="position: absolute; right: 0; bottom: 0; width: 30px; height: 30px; border-right: 3px solid ${V.ret.c}; border-bottom: 3px solid ${V.ret.c}; border-radius: 0 0 12px 0; transition: border-color 0.3s"></div>
+</div>
+<div style="position: absolute; left: 72px; width: 249px; height: 3px; top: ${V.beam.top}; opacity: ${V.beam.op}; border-radius: 2px; background: linear-gradient(90deg, rgba(244, 169, 59, 0), #F4A93B, rgba(244, 169, 59, 0)); box-shadow: 0 0 18px 4px rgba(244, 169, 59, 0.55); transition: top 1.3s ease-in-out, opacity 0.3s"></div>
+
+<div style="position: absolute; inset: 0; opacity: ${V.tags.op}; transform: ${V.tags.tf}; transform-origin: 200px 380px; transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); pointer-events: none">
+<svg aria-hidden="true" style="position: absolute; inset: 0" width="393" height="852" viewBox="0 0 393 852">
+<path d="M158 318 L118 292" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="3 4"></path>
+<path d="M262 400 L300 436" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="3 4"></path>
+<path d="M150 410 L104 470" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="3 4"></path>
+<circle cx="158" cy="318" r="12" fill="#F4A93B" fill-opacity="0.3"></circle><circle cx="158" cy="318" r="6" fill="#F4A93B" stroke="#FFFFFF" stroke-width="2"></circle>
+<circle cx="262" cy="400" r="12" fill="#F4A93B" fill-opacity="0.3"></circle><circle cx="262" cy="400" r="6" fill="#F4A93B" stroke="#FFFFFF" stroke-width="2"></circle>
+<circle cx="150" cy="410" r="12" fill="#F4A93B" fill-opacity="0.3"></circle><circle cx="150" cy="410" r="6" fill="#F4A93B" stroke="#FFFFFF" stroke-width="2"></circle>
+</svg>
+<div style="position: absolute; left: 132px; top: 160px; padding: 6px 12px 6px 6px; border-radius: 999px; background: #FFFFFF; display: flex; align-items: center; gap: 8px; box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.5)"><span style="width: 28px; height: 28px; border-radius: 14px; background: #3C7F4D; color: #FFFFFF; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center">B</span><span style="font-size: 14px; font-weight: 800">5,5 kg CO₂e</span></div>
+<div style="position: absolute; left: 14px; top: 252px; padding: 9px 12px; border-radius: 14px; background: rgba(20, 23, 31, 0.72); backdrop-filter: blur(12px); color: #FFFFFF; border: 1px solid rgba(255, 255, 255, 0.16)"><div style="font-size: 11px; color: #D4D8E4">Serat</div><div style="font-size: 13px; font-weight: 700">Katun organik 100%</div></div>
+<div style="position: absolute; right: 14px; top: 438px; padding: 9px 12px; border-radius: 14px; background: rgba(20, 23, 31, 0.72); backdrop-filter: blur(12px); color: #FFFFFF; border: 1px solid rgba(255, 255, 255, 0.16)"><div style="font-size: 11px; color: #D4D8E4">Ditenun & dicelup</div><div style="font-size: 13px; font-weight: 700">Majalaya, Jawa Barat</div></div>
+<div style="position: absolute; left: 14px; top: 472px; padding: 9px 12px; border-radius: 14px; background: rgba(20, 23, 31, 0.72); backdrop-filter: blur(12px); color: #FFFFFF; border: 1px solid rgba(255, 255, 255, 0.16)"><div style="font-size: 11px; color: #D4D8E4">Pewarna</div><div style="font-size: 13px; font-weight: 700">Indigo alami</div></div>
+</div>
+
+<div style="position: absolute; left: 16px; right: 16px; top: 58px; display: flex; align-items: center; justify-content: space-between; gap: 10px">
+<button onClick="${V.closeScan}" aria-label="Tutup kamera" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: rgba(20, 20, 22, 0.45); backdrop-filter: blur(12px); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+<div role="status" style="padding: 10px 14px; border-radius: 999px; background: rgba(20, 20, 22, 0.55); backdrop-filter: blur(12px); color: #FFFFFF; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 8px"><span style="width: 8px; height: 8px; border-radius: 4px; background: ${V.scanDot}; transition: background 0.3s"></span>${V.scanHint}</div>
+<button onClick="${V.toggleTorch}" aria-label="Senter" aria-pressed="${V.torch}" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: ${V.torchBg}; backdrop-filter: blur(12px); color: ${V.torchFg}; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background 0.25s"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7z"></path></svg></button>
+</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 34px; display: flex; flex-direction: column; align-items: center; gap: 18px; opacity: ${V.cam.op}; pointer-events: ${V.cam.pe}; transition: opacity 0.3s">
+<div style="display: flex; gap: 22px; font-size: 12px; font-weight: 700; letter-spacing: 0.08em"><span style="color: rgba(255, 255, 255, 0.7)">LABEL</span><span style="color: #F4A93B">PAKAIAN</span><span style="color: rgba(255, 255, 255, 0.7)">STRUK</span></div>
+<div style="width: 100%; padding: 0 36px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between">
+<button onClick="${V.gallery}" aria-label="Galeri" style="width: 48px; height: 48px; border-radius: 14px; border: 2px solid rgba(255, 255, 255, 0.8); background: linear-gradient(135deg, #C9B48A, #6E8068); cursor: pointer"></button>
+<button onClick="${V.shoot}" aria-label="Pindai pakaian" style="width: 80px; height: 80px; border-radius: 40px; border: 4px solid #FFFFFF; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0"><span style="width: 64px; height: 64px; border-radius: 32px; background: ${V.shutterIn}; transform: ${V.shutterTf}; transition: all 0.25s"></span></button>
+<button onClick="${V.flip}" aria-label="Balik kamera" style="width: 48px; height: 48px; border-radius: 24px; border: none; background: rgba(20, 20, 22, 0.45); backdrop-filter: blur(12px); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8 8 0 00-14-4.5L4 8M4 4v4h4M4 13a8 8 0 0014 4.5L20 16M20 20v-4h-4"></path></svg></button>
+</div>
+</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; background: #F7F5F0; border-radius: 30px 30px 0 0; padding: 10px 20px 34px; box-sizing: border-box; transform: ${V.found.tf}; transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1); display: flex; flex-direction: column; gap: 14px">
+<div style="width: 40px; height: 5px; border-radius: 3px; background: #D6D0C5; align-self: center"></div>
+<div style="display: flex; gap: 14px; align-items: center">
+<div style="width: 72px; height: 72px; border-radius: 18px; background: #E6E9F4; display: flex; align-items: center; justify-content: center; flex: none">
+<svg aria-hidden="true" width="52" height="60" viewBox="0 0 240 280"><defs><linearGradient id="ftG" x1="0" x2="1"><stop offset="0" stop-color="#2A3D86"></stop><stop offset="0.5" stop-color="#4863B8"></stop><stop offset="1" stop-color="#26397E"></stop></linearGradient></defs><path d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="url(#ftG)"></path><path d="M78 30 L120 46 L106 70 L84 54 Z" fill="#3B55A8"></path><path d="M162 30 L120 46 L134 70 L156 54 Z" fill="#3651A2"></path></svg>
+</div>
+<div style="flex: 1; min-width: 0">
+<div style="font-size: 12px; color: #5D6270">Rupa Tenun · Majalaya</div>
+<div style="font-size: 18px; font-weight: 800; letter-spacing: -0.01em">Kemeja Oxford Indigo</div>
+<div style="margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap">
+<span style="padding: 4px 9px; border-radius: 999px; background: #E3EFE6; color: #1D6B3F; font-size: 12px; font-weight: 800">B · 5,5 kg CO₂e</span>
+<span style="padding: 4px 9px; border-radius: 999px; background: #E8EBF6; color: #283B8E; font-size: 12px; font-weight: 700">Terverifikasi</span>
+</div>
+</div>
+</div>
+<button onClick="${V.goProductScan}" style="height: 54px; border-radius: 27px; border: none; background: #283B8E; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">Lihat cerita & jejak karbonnya</button>
+<button onClick="${V.rescan}" style="height: 44px; border: none; background: transparent; font-family: inherit; font-size: 14px; font-weight: 700; color: #3D4252; cursor: pointer">Pindai ulang</button>
+</div>
+</div>
+
+
+<div style="position: absolute; inset: 0; background: #F7F5F0; overflow: hidden; opacity: ${V.scr.product.op}; visibility: ${V.scr.product.vis}; pointer-events: ${V.scr.product.pe}; transform: ${V.scr.product.tf}; transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s">
+<div style="position: absolute; left: 0; right: 0; top: 0; bottom: 100px; overflow-y: auto; scrollbar-width: none">
+<div style="position: relative; height: 410px; background: linear-gradient(180deg, #EAE5DB 0%, #DDD5C7 100%); overflow: hidden">
+<svg aria-hidden="true" style="position: absolute; inset: 0" width="393" height="410" viewBox="0 0 393 410">
+<defs>
+<radialGradient id="prLight" cx="0.5" cy="0.35" r="0.6"><stop offset="0" stop-color="#FFFFFF" stop-opacity="0.65"></stop><stop offset="1" stop-color="#FFFFFF" stop-opacity="0"></stop></radialGradient>
+<linearGradient id="prG" x1="0" x2="1"><stop offset="0" stop-color="#2A3D86"></stop><stop offset="0.5" stop-color="#4C67BC"></stop><stop offset="1" stop-color="#25387C"></stop></linearGradient>
+<pattern id="prT" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(40)"><line x1="0" y1="0" x2="0" y2="5" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="1.6"></line></pattern>
+<filter id="prSoft" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="10"></feGaussianBlur></filter>
+</defs>
+<rect width="393" height="410" fill="url(#prLight)"></rect>
+<ellipse cx="196" cy="384" rx="120" ry="12" fill="#000000" fill-opacity="0.18" filter="url(#prSoft)"></ellipse>
+<g transform="translate(76 92)">
+<path d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="url(#prG)"></path>
+<path d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="url(#prT)"></path>
+<path d="M206 50 Q214 120 216 200" fill="none" stroke="#000000" stroke-opacity="0.14" stroke-width="3"></path>
+<path d="M34 50 Q26 120 24 200" fill="none" stroke="#000000" stroke-opacity="0.14" stroke-width="3"></path>
+<path d="M194 112 L192 262 L180 262 L186 120 Z" fill="#000000" fill-opacity="0.14"></path>
+<path d="M46 112 L48 262 L60 262 L54 120 Z" fill="#000000" fill-opacity="0.14"></path>
+<path d="M82 28 Q120 14 158 28 L162 30 L120 46 L78 30 Z" fill="#1E2C66"></path>
+<path d="M78 30 L120 46 L106 70 L84 54 Z" fill="#3B55A8"></path>
+<path d="M162 30 L120 46 L134 70 L156 54 Z" fill="#3651A2"></path>
+<path d="M106 70 L120 46 L134 70 L120 62 Z" fill="#000000" fill-opacity="0.2"></path>
+<rect x="114" y="54" width="12" height="210" fill="#000000" fill-opacity="0.07"></rect>
+<line x1="120" y1="54" x2="120" y2="266" stroke="#1E2C66" stroke-width="1"></line>
+<circle cx="123" cy="86" r="3" fill="#E8E3D8"></circle><circle cx="123" cy="118" r="3" fill="#E8E3D8"></circle><circle cx="123" cy="150" r="3" fill="#E8E3D8"></circle><circle cx="123" cy="182" r="3" fill="#E8E3D8"></circle><circle cx="123" cy="214" r="3" fill="#E8E3D8"></circle><circle cx="123" cy="246" r="3" fill="#E8E3D8"></circle>
+<path d="M64 100 h36 v36 q-18 7 -36 0 z" fill="none" stroke="#1E2C66" stroke-opacity="0.6" stroke-width="1.5"></path>
+<path d="M11 196 L36 198 M204 198 L229 196" stroke="#1E2C66" stroke-opacity="0.6" stroke-width="2"></path>
+<path d="M48 262 Q120 274 192 262 L192 254 Q120 266 48 254 Z" fill="#000000" fill-opacity="0.12"></path>
+<path d="M120 46 L162 30 L176 40 L140 72 Z" fill="#FFFFFF" fill-opacity="0.07"></path>
+</g>
+</svg>
+<div style="position: absolute; left: 16px; right: 16px; top: 58px; display: flex; justify-content: space-between">
+<button onClick="${V.backProduct}" aria-label="Kembali" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: rgba(255, 255, 255, 0.9); color: #14171F; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg></button>
+<div style="display: flex; gap: 10px">
+<button onClick="${V.share}" aria-label="Bagikan" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: rgba(255, 255, 255, 0.9); color: #14171F; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 8l5-5 5 5M5 14v5a2 2 0 002 2h10a2 2 0 002-2v-5"></path></svg></button>
+<button onClick="${V.toggleLike}" aria-label="Simpan ke favorit" aria-pressed="${V.liked}" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: rgba(255, 255, 255, 0.9); color: ${V.likeStroke}; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="${V.likeFill}" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 20s-7-4.4-9-9a4.8 4.8 0 019-3 4.8 4.8 0 019 3c-2 4.6-9 9-9 9z"></path></svg></button>
+</div>
+</div>
+<button onClick="${V.goScan}" style="position: absolute; left: 16px; bottom: 44px; height: 36px; padding: 0 12px; border-radius: 18px; border: none; background: rgba(20, 23, 31, 0.72); backdrop-filter: blur(12px); color: #FFFFFF; font-family: inherit; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 6px; cursor: pointer"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l9 5v10l-9 5-9-5V7z"></path><path d="M12 22V12M21 7l-9 5-9-5"></path></svg>Lihat di AR</button>
+<div aria-hidden="true" style="position: absolute; right: 18px; bottom: 54px; display: flex; gap: 5px"><span style="width: 18px; height: 6px; border-radius: 3px; background: #14171F"></span><span style="width: 6px; height: 6px; border-radius: 3px; background: rgba(20, 23, 31, 0.3)"></span><span style="width: 6px; height: 6px; border-radius: 3px; background: rgba(20, 23, 31, 0.3)"></span></div>
+</div>
+
+<div style="position: relative; margin-top: -26px; background: #F7F5F0; border-radius: 28px 28px 0 0; padding: 22px 20px 24px; display: flex; flex-direction: column; gap: 16px">
+<div>
+<div style="font-size: 13px; color: #5D6270">Rupa Tenun · Majalaya</div>
+<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-top: 2px">
+<h1 style="margin: 0; font-size: 23px; font-weight: 800; letter-spacing: -0.02em">Kemeja Oxford Indigo</h1>
+<span style="font-size: 18px; font-weight: 800; white-space: nowrap">Rp 389.000</span>
+</div>
+<div style="margin-top: 4px; font-size: 13px; color: #5D6270">Katun organik 100% · pewarna indigo alami</div>
+</div>
+
+<div style="background: #FFFFFF; border: 1px solid #ECE7DE; border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: flex; align-items: center; gap: 14px">
+<div style="position: relative; width: 74px; height: 74px; flex: none">
+<svg aria-hidden="true" width="74" height="74" viewBox="0 0 74 74"><circle cx="37" cy="37" r="31" fill="none" stroke="#EEEAE2" stroke-width="8"></circle><circle cx="37" cy="37" r="31" fill="none" stroke="#3C7F4D" stroke-width="8" stroke-linecap="round" stroke-dasharray="146 195" transform="rotate(-90 37 37)"></circle></svg>
+<div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center"><span style="font-size: 24px; font-weight: 800; line-height: 1">B</span><span style="font-size: 10px; font-weight: 700; color: #5D6270">SKOR</span></div>
+</div>
+<div>
+<div style="font-size: 12px; color: #5D6270">Jejak karbon per kemeja</div>
+<div style="font-size: 24px; font-weight: 800; letter-spacing: -0.02em">5,5 kg CO₂e</div>
+<div style="font-size: 12px; color: #5D6270">≈ 55 km naik sepeda motor</div>
+</div>
+</div>
+<div>
+<div style="display: flex; gap: 4px">
+<span style="flex: 1; height: 8px; border-radius: 4px; background: #1D6B3F"></span>
+<span style="flex: 1; height: 8px; border-radius: 4px; background: #3C7F4D; box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 4px #3C7F4D"></span>
+<span style="flex: 1; height: 8px; border-radius: 4px; background: #E2B33C"></span>
+<span style="flex: 1; height: 8px; border-radius: 4px; background: #D9703A"></span>
+<span style="flex: 1; height: 8px; border-radius: 4px; background: #B23A2B"></span>
+</div>
+<div style="display: flex; margin-top: 6px; font-size: 11px; font-weight: 700; color: #5D6270"><span style="flex: 1">A</span><span style="flex: 1; color: #14171F">B</span><span style="flex: 1">C</span><span style="flex: 1">D</span><span style="flex: 1">E</span></div>
+</div>
+<button onClick="${V.openProof}" style="width: 100%; min-height: 48px; padding: 10px 12px; border-radius: 16px; border: none; background: #EEF1FA; display: flex; align-items: center; gap: 10px; font-family: inherit; color: #283B8E; text-align: left; cursor: pointer">
+<svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"></path><path d="M8.5 12l2.5 2.5 4.5-5"></path></svg>
+<span style="flex: 1; font-size: 13px; font-weight: 800">Terverifikasi blockchain</span>
+<span style="font-size: 13px; font-weight: 700">Lihat bukti</span>
+<svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+</div>
+
+<div style="background: #FFFFFF; border: 1px solid #ECE7DE; border-radius: 24px; padding: 16px; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 15px; font-weight: 800">Dari mana 5,5 kg ini berasal?</h2><span style="font-size: 12px; color: #5D6270">Ketuk tahap</span></div>
+<div style="display: flex; gap: 3px; height: 14px">
+${V.stages.map((sg) => html`<span style="width: ${sg.pct}; border-radius: 4px; background: ${sg.color}; opacity: ${sg.dim}; transition: opacity 0.3s"></span>`)}
+</div>
+<div style="display: flex; flex-direction: column">
+${V.stages.map((st) => html`
+<div style="border-radius: 14px; background: ${st.rowBg}; transition: background 0.25s">
+<button onClick="${st.toggle}" aria-expanded="${st.open}" style="width: 100%; min-height: 46px; padding: 0 10px; border: none; background: transparent; display: flex; align-items: center; gap: 10px; font-family: inherit; color: #14171F; cursor: pointer; text-align: left">
+<span style="width: 10px; height: 10px; border-radius: 5px; background: ${st.color}; flex: none"></span>
+<span style="flex: 1; font-size: 14px; font-weight: 600">${st.name}</span>
+<span style="font-size: 14px; font-weight: 800">${st.kg} kg</span>
+<span style="width: 38px; text-align: right; font-size: 12px; color: #5D6270">${st.pct}</span>
+<svg aria-hidden="true" style="transform: ${st.chev}; transition: transform 0.25s" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5D6270" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+${st.open ? html`
+<div style="padding: 0 12px 12px 30px; display: flex; flex-direction: column; gap: 8px">
+<p style="margin: 0; font-size: 13px; line-height: 1.5; color: #3D4252">${st.note}</p>
+<button onClick="${st.play}" style="align-self: flex-start; height: 36px; padding: 0 14px; border-radius: 18px; border: none; background: #283B8E; color: #FFFFFF; font-family: inherit; font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 6px; cursor: pointer"><svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"></path></svg>Putar babak ini di VR</button>
+</div>
+` : null}
+</div>
+`)}
+</div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div style="padding: 12px 10px; border-radius: 18px; background: #FFFFFF; border: 1px solid #ECE7DE; display: flex; flex-direction: column; gap: 6px"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#283B8E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.8V4a2 2 0 00-4 0v10.8a4 4 0 104 0z"></path></svg><span style="font-size: 12px; font-weight: 700; line-height: 1.3">Cuci air dingin</span></div>
+<div style="padding: 12px 10px; border-radius: 18px; background: #FFFFFF; border: 1px solid #ECE7DE; display: flex; flex-direction: column; gap: 6px"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#283B8E" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5"></path></svg><span style="font-size: 12px; font-weight: 700; line-height: 1.3">Jemur di matahari</span></div>
+<div style="padding: 12px 10px; border-radius: 18px; background: #FFFFFF; border: 1px solid #ECE7DE; display: flex; flex-direction: column; gap: 6px"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#283B8E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 2l3 3-3 3M3 11V9a4 4 0 014-4h13M7 22l-3-3 3-3M21 13v2a4 4 0 01-4 4H4"></path></svg><span style="font-size: 12px; font-weight: 700; line-height: 1.3">Tukar saat bosan</span></div>
+</div>
+<div style="font-size: 11px; color: #6B707D; text-align: center">Angka dan merek pada prototipe ini adalah data simulasi.</div>
+</div>
+</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 100px; padding: 12px 16px 32px; box-sizing: border-box; background: rgba(247, 245, 240, 0.95); backdrop-filter: blur(16px); border-top: 1px solid #E6E1D8; display: flex; gap: 10px">
+<button onClick="${V.goCompare}" style="flex: 1; border-radius: 28px; border: 1.5px solid #14171F; background: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 800; color: #14171F; cursor: pointer">Bandingkan</button>
+<button onClick="${V.goJourney}" style="flex: 1.5; border-radius: 28px; border: none; background: #283B8E; color: #FFFFFF; font-family: inherit; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4A93B" stroke-width="2" stroke-linecap="round"><rect x="2.5" y="7" width="19" height="10" rx="4"></rect><circle cx="8.5" cy="12" r="1.6"></circle><circle cx="15.5" cy="12" r="1.6"></circle></svg>${V.journeyCta}</button>
+</div>
+
+<button onClick="${V.closeSheet}" aria-label="Tutup bukti" style="position: absolute; inset: 0; border: none; padding: 0; background: rgba(20, 23, 31, 0.5); opacity: ${V.sh.proof.op}; pointer-events: ${V.sh.proof.pe}; transition: opacity 0.3s; cursor: pointer"></button>
+<div role="dialog" aria-label="Bukti terverifikasi" style="position: absolute; left: 0; right: 0; bottom: 0; max-height: 720px; overflow-y: auto; scrollbar-width: none; background: #F7F5F0; border-radius: 30px 30px 0 0; padding: 10px 20px 34px; box-sizing: border-box; transform: ${V.sh.proof.tf}; visibility: ${V.sh.proof.vis}; transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.45s; display: flex; flex-direction: column; gap: 14px">
+<div style="width: 40px; height: 5px; border-radius: 3px; background: #D6D0C5; align-self: center"></div>
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="width: 48px; height: 48px; border-radius: 16px; background: #283B8E; color: #FFFFFF; display: flex; align-items: center; justify-content: center; flex: none"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"></rect><rect x="14" y="3" width="7" height="7" rx="1.5"></rect><rect x="8.5" y="14" width="7" height="7" rx="1.5"></rect><path d="M10 6.5h4M6.5 10v2.5a2 2 0 002 2M17.5 10v2.5a2 2 0 01-2 2"></path></svg></div>
+<div><h2 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.01em">Bukti terverifikasi</h2><div style="font-size: 13px; color: #5D6270">Setiap tahap tercatat dan tidak bisa diubah diam-diam.</div></div>
+</div>
+<div style="display: flex; flex-direction: column">
+<div style="display: flex; gap: 12px"><div style="display: flex; flex-direction: column; align-items: center"><span style="width: 14px; height: 14px; border-radius: 7px; background: #1D6B3F; border: 3px solid #E3EFE6"></span><span style="flex: 1; width: 2px; background: #DDD7CC"></span></div><div style="padding-bottom: 16px; flex: 1"><div style="font-size: 14px; font-weight: 800">Serat kapas organik</div><div style="font-size: 12px; color: #5D6270">Koperasi petani · sertifikat organik</div><div style="margin-top: 6px; display: inline-block; padding: 4px 8px; border-radius: 8px; background: #EEEAE2; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: #3D4252">Blok #4.182.907 · 0x7f3a…c21e</div></div></div>
+<div style="display: flex; gap: 12px"><div style="display: flex; flex-direction: column; align-items: center"><span style="width: 14px; height: 14px; border-radius: 7px; background: #1D6B3F; border: 3px solid #E3EFE6"></span><span style="flex: 1; width: 2px; background: #DDD7CC"></span></div><div style="padding-bottom: 16px; flex: 1"><div style="font-size: 14px; font-weight: 800">Tenun & celup indigo</div><div style="font-size: 12px; color: #5D6270">Rupa Tenun · Majalaya</div><div style="margin-top: 6px; display: inline-block; padding: 4px 8px; border-radius: 8px; background: #EEEAE2; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: #3D4252">Blok #4.190.212 · 0x19bd…8e04</div></div></div>
+<div style="display: flex; gap: 12px"><div style="display: flex; flex-direction: column; align-items: center"><span style="width: 14px; height: 14px; border-radius: 7px; background: #1D6B3F; border: 3px solid #E3EFE6"></span><span style="flex: 1; width: 2px; background: #DDD7CC"></span></div><div style="padding-bottom: 16px; flex: 1"><div style="font-size: 14px; font-weight: 800">Pengiriman ke Bandung</div><div style="font-size: 12px; color: #5D6270">Data GPS truk · 32 km</div><div style="margin-top: 6px; display: inline-block; padding: 4px 8px; border-radius: 8px; background: #EEEAE2; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: #3D4252">Blok #4.191.877 · 0xa4c0…37f9</div></div></div>
+<div style="display: flex; gap: 12px"><div style="display: flex; flex-direction: column; align-items: center"><span style="width: 14px; height: 14px; border-radius: 7px; background: #283B8E; border: 3px solid #E8EBF6"></span></div><div style="flex: 1"><div style="font-size: 14px; font-weight: 800">Audit LCA independen</div><div style="font-size: 12px; color: #5D6270">[NAMA LEMBAGA AUDIT] · skor B disetujui</div><div style="margin-top: 6px; display: inline-block; padding: 4px 8px; border-radius: 8px; background: #EEEAE2; font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: #3D4252">Blok #4.193.020 · 0x5e2d…b1a6</div></div></div>
+</div>
+<div style="font-size: 11px; color: #6B707D">Nomor blok dan kode di atas adalah contoh simulasi.</div>
+<button onClick="${V.closeSheet}" style="height: 52px; border-radius: 26px; border: none; background: #14171F; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">Mengerti</button>
+</div>
+</div>
+
+
+<div style="position: absolute; inset: 0; background: #0E1328; overflow: hidden; opacity: ${V.scr.journey.op}; visibility: ${V.scr.journey.vis}; pointer-events: ${V.scr.journey.pe}; transform: ${V.scr.journey.tf}; transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s">
+
+<svg aria-hidden="true" style="position: absolute; inset: 0; opacity: ${V.jsc.s0}; transition: opacity 0.7s ease" width="393" height="852" viewBox="0 0 393 852">
+<defs>
+<linearGradient id="j0Sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#232F68"></stop><stop offset="0.5" stop-color="#C47F72"></stop><stop offset="0.78" stop-color="#F2B07B"></stop><stop offset="1" stop-color="#F8D59C"></stop></linearGradient>
+<radialGradient id="j0Sun" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#FFF1C9" stop-opacity="0.95"></stop><stop offset="1" stop-color="#FFF1C9" stop-opacity="0"></stop></radialGradient>
+<linearGradient id="j0Gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7C8545"></stop><stop offset="1" stop-color="#3A4120"></stop></linearGradient>
+</defs>
+<rect width="393" height="380" fill="url(#j0Sky)"></rect>
+<circle cx="300" cy="336" r="96" fill="url(#j0Sun)"></circle>
+<circle cx="300" cy="338" r="34" fill="#FFEAB8"></circle>
+<path d="M0 350 Q70 318 140 336 T280 328 T393 334 V380 H0 Z" fill="#9B7E86" fill-opacity="0.65"></path>
+<path d="M0 366 Q90 342 190 360 T393 354 V380 H0 Z" fill="#6E6450"></path>
+<rect y="360" width="393" height="492" fill="url(#j0Gr)"></rect>
+<polygon points="196,360 -454,852 -324,852" fill="#4C5F2D"></polygon>
+<polygon points="196,360 -194,852 -64,852" fill="#4C5F2D"></polygon>
+<polygon points="196,360 66,852 196,852" fill="#4C5F2D"></polygon>
+<polygon points="196,360 326,852 456,852" fill="#4C5F2D"></polygon>
+<polygon points="196,360 586,852 716,852" fill="#4C5F2D"></polygon>
+<g fill="#F8F4EA">
+<circle cx="126" cy="419" r="2.4"></circle><circle cx="157" cy="419" r="2.4"></circle><circle cx="188" cy="419" r="2.4"></circle><circle cx="219" cy="419" r="2.4"></circle><circle cx="251" cy="419" r="2.4"></circle>
+<circle cx="79" cy="458" r="4"></circle><circle cx="131" cy="458" r="4"></circle><circle cx="183" cy="458" r="4"></circle><circle cx="235" cy="458" r="4"></circle><circle cx="287" cy="458" r="4"></circle>
+<circle cx="88" cy="452" r="3"></circle><circle cx="244" cy="452" r="3"></circle><circle cx="192" cy="452" r="3"></circle>
+<circle cx="20" cy="508" r="6"></circle><circle cx="98" cy="508" r="6"></circle><circle cx="176" cy="508" r="6"></circle><circle cx="254" cy="508" r="6"></circle><circle cx="332" cy="508" r="6"></circle>
+<circle cx="112" cy="500" r="4.5"></circle><circle cx="190" cy="500" r="4.5"></circle><circle cx="268" cy="500" r="4.5"></circle><circle cx="346" cy="500" r="4.5"></circle>
+<circle cx="60" cy="567" r="8.5"></circle><circle cx="169" cy="567" r="8.5"></circle><circle cx="278" cy="567" r="8.5"></circle><circle cx="387" cy="567" r="8.5"></circle>
+<circle cx="80" cy="556" r="6"></circle><circle cx="188" cy="556" r="6"></circle><circle cx="298" cy="556" r="6"></circle>
+<circle cx="14" cy="636" r="11"></circle><circle cx="160" cy="636" r="11"></circle><circle cx="305" cy="636" r="11"></circle><circle cx="182" cy="624" r="8"></circle><circle cx="328" cy="624" r="8"></circle>
+</g>
+<g fill="#2F3B18" fill-opacity="0.6">
+<ellipse cx="79" cy="463" rx="7" ry="3"></ellipse><ellipse cx="183" cy="463" rx="7" ry="3"></ellipse><ellipse cx="287" cy="463" rx="7" ry="3"></ellipse>
+<ellipse cx="98" cy="515" rx="10" ry="4"></ellipse><ellipse cx="176" cy="515" rx="10" ry="4"></ellipse><ellipse cx="254" cy="515" rx="10" ry="4"></ellipse>
+<ellipse cx="169" cy="577" rx="14" ry="5"></ellipse><ellipse cx="278" cy="577" rx="14" ry="5"></ellipse><ellipse cx="60" cy="577" rx="14" ry="5"></ellipse>
+</g>
+</svg>
+
+<svg aria-hidden="true" style="position: absolute; inset: 0; opacity: ${V.jsc.s1}; transition: opacity 0.7s ease" width="393" height="852" viewBox="0 0 393 852">
+<defs>
+<linearGradient id="j1Wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2B3159"></stop><stop offset="1" stop-color="#1A1E3A"></stop></linearGradient>
+<linearGradient id="j1Win" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FCE6B6"></stop><stop offset="1" stop-color="#F0BD78"></stop></linearGradient>
+<linearGradient id="j1Vat" x1="0" x2="1"><stop offset="0" stop-color="#4A3522"></stop><stop offset="0.5" stop-color="#7A5A3B"></stop><stop offset="1" stop-color="#432F1E"></stop></linearGradient>
+</defs>
+<rect width="393" height="852" fill="url(#j1Wall)"></rect>
+<polygon points="26,320 130,320 270,760 70,760" fill="#F7D9A0" fill-opacity="0.13"></polygon>
+<rect x="26" y="170" width="104" height="150" rx="4" fill="url(#j1Win)"></rect>
+<path d="M78 170 V320 M26 245 H130" stroke="#3A3F66" stroke-width="5"></path>
+<rect x="22" y="166" width="112" height="158" rx="6" fill="none" stroke="#3A3F66" stroke-width="6"></rect>
+<rect y="560" width="393" height="292" fill="#151831"></rect>
+<rect x="40" y="480" width="140" height="92" rx="8" fill="url(#j1Vat)"></rect>
+<path d="M40 506 H180 M40 546 H180" stroke="#2A1E14" stroke-width="4"></path>
+<ellipse cx="110" cy="480" rx="70" ry="16" fill="#4A3522"></ellipse>
+<ellipse cx="110" cy="481" rx="61" ry="12" fill="#18225A"></ellipse>
+<ellipse cx="96" cy="478" rx="24" ry="4" fill="#FFFFFF" fill-opacity="0.16"></ellipse>
+<circle cx="92" cy="452" r="18" fill="#FFFFFF" fill-opacity="0.05"></circle><circle cx="120" cy="436" r="24" fill="#FFFFFF" fill-opacity="0.04"></circle>
+<rect x="222" y="506" width="108" height="66" rx="8" fill="url(#j1Vat)"></rect>
+<ellipse cx="276" cy="506" rx="54" ry="12" fill="#4A3522"></ellipse>
+<ellipse cx="276" cy="507" rx="46" ry="9" fill="#22307A"></ellipse>
+<rect x="0" y="138" width="393" height="14" fill="#5A4330"></rect>
+<rect x="0" y="152" width="393" height="4" fill="#000000" fill-opacity="0.25"></rect>
+<path d="M160 152 h30 V468 q-7 10 -15 0 q-8 -10 -15 0 Z" fill="#1B2766"></path>
+<path d="M196 152 h30 V520 q-7 10 -15 0 q-8 -10 -15 0 Z" fill="#2C3F8E"></path>
+<path d="M232 152 h30 V448 q-7 10 -15 0 q-8 -10 -15 0 Z" fill="#3F57AE"></path>
+<path d="M268 152 h30 V540 q-7 10 -15 0 q-8 -10 -15 0 Z" fill="#22337A"></path>
+<path d="M304 152 h30 V488 q-7 10 -15 0 q-8 -10 -15 0 Z" fill="#5C76C7"></path>
+<path d="M340 152 h30 V430 q-7 10 -15 0 q-8 -10 -15 0 Z" fill="#8EA2DC"></path>
+<path d="M164 152 V466 M200 152 V518 M236 152 V446 M272 152 V538 M308 152 V486 M344 152 V428" stroke="#FFFFFF" stroke-opacity="0.09" stroke-width="5"></path>
+<ellipse cx="211" cy="534" rx="2" ry="4" fill="#5C76C7"></ellipse><ellipse cx="283" cy="556" rx="2" ry="4" fill="#5C76C7"></ellipse><ellipse cx="175" cy="484" rx="2" ry="4" fill="#5C76C7"></ellipse>
+</svg>
+
+<svg aria-hidden="true" style="position: absolute; inset: 0; opacity: ${V.jsc.s2}; transition: opacity 0.7s ease" width="393" height="852" viewBox="0 0 393 852">
+<defs>
+<linearGradient id="j2Sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#17214D"></stop><stop offset="0.6" stop-color="#5B4E86"></stop><stop offset="0.86" stop-color="#D98C6B"></stop><stop offset="1" stop-color="#F2B27C"></stop></linearGradient>
+<linearGradient id="j2Box" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2EEE6"></stop><stop offset="1" stop-color="#C6BFB1"></stop></linearGradient>
+<radialGradient id="j2Glow" cx="0.5" cy="0.5" r="0.5"><stop offset="0" stop-color="#FF5A3C" stop-opacity="0.55"></stop><stop offset="1" stop-color="#FF5A3C" stop-opacity="0"></stop></radialGradient>
+</defs>
+<rect width="393" height="390" fill="url(#j2Sky)"></rect>
+<g fill="#FFFFFF"><circle cx="40" cy="150" r="1.2"></circle><circle cx="120" cy="190" r="1"></circle><circle cx="330" cy="160" r="1.4"></circle><circle cx="260" cy="210" r="1"></circle><circle cx="80" cy="240" r="1"></circle><circle cx="360" cy="250" r="1.1"></circle></g>
+<path d="M0 360 L60 320 L110 350 L170 300 L230 352 L300 312 L393 356 V390 H0 Z" fill="#2E2A55"></path>
+<rect y="380" width="393" height="472" fill="#2D3829"></rect>
+<polygon points="184,380 209,380 470,852 -77,852" fill="#2A2A31"></polygon>
+<path d="M184 380 L-77 852 M209 380 L470 852" stroke="#E9E4DA" stroke-opacity="0.5" stroke-width="2"></path>
+<g fill="#F4C46B">
+<polygon points="195.1,408 197.9,408 198.3,427 194.7,427"></polygon>
+<polygon points="194.5,455 198.5,455 199.2,484 193.8,484"></polygon>
+<polygon points="193.7,522 199.3,522 200.4,569 192.6,569"></polygon>
+<polygon points="192.4,625 200.6,625 202.2,692 190.8,692"></polygon>
+</g>
+<g fill="#1C2620"><polygon points="20,384 34,330 48,384"></polygon><polygon points="52,386 70,316 88,386"></polygon><polygon points="96,382 106,348 116,382"></polygon><polygon points="296,382 306,342 316,382"></polygon><polygon points="322,386 342,312 362,386"></polygon><polygon points="360,384 374,334 388,384"></polygon></g>
+<ellipse cx="196" cy="522" rx="58" ry="7" fill="#000000" fill-opacity="0.45"></ellipse>
+<rect x="164" y="404" width="64" height="18" rx="4" fill="#283B8E"></rect>
+<rect x="150" y="418" width="92" height="86" rx="4" fill="url(#j2Box)"></rect>
+<path d="M196 422 V500" stroke="#9E978A" stroke-width="1.5"></path>
+<rect x="186" y="452" width="4" height="12" rx="2" fill="#7C766B"></rect><rect x="202" y="452" width="4" height="12" rx="2" fill="#7C766B"></rect>
+<text x="196" y="436" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="7" font-weight="800" fill="#283B8E" letter-spacing="0.5">JEJAK BENANG</text>
+<rect x="146" y="502" width="100" height="9" rx="2" fill="#3A3A40"></rect>
+<rect x="156" y="508" width="18" height="14" rx="3" fill="#121214"></rect><rect x="218" y="508" width="18" height="14" rx="3" fill="#121214"></rect>
+<circle cx="157" cy="490" r="18" fill="url(#j2Glow)"></circle><circle cx="235" cy="490" r="18" fill="url(#j2Glow)"></circle>
+<rect x="152" y="484" width="9" height="13" rx="2" fill="#E0533D"></rect><rect x="231" y="484" width="9" height="13" rx="2" fill="#E0533D"></rect>
+</svg>
+
+<svg aria-hidden="true" style="position: absolute; inset: 0; opacity: ${V.jsc.s3}; transition: opacity 0.7s ease" width="393" height="852" viewBox="0 0 393 852">
+<defs>
+<linearGradient id="j3Wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EDE7DC"></stop><stop offset="1" stop-color="#D9CFBE"></stop></linearGradient>
+<linearGradient id="j3Sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#BFD9EE"></stop><stop offset="1" stop-color="#E7F1F7"></stop></linearGradient>
+<radialGradient id="j3Glass" cx="0.4" cy="0.35" r="0.7"><stop offset="0" stop-color="#B9C8D9"></stop><stop offset="1" stop-color="#55687F"></stop></radialGradient>
+<linearGradient id="j3Body" x1="0" x2="1"><stop offset="0" stop-color="#FFFFFF"></stop><stop offset="1" stop-color="#E6E2DA"></stop></linearGradient>
+<linearGradient id="j3Shirt" x1="0" x2="1"><stop offset="0" stop-color="#2A3D86"></stop><stop offset="0.5" stop-color="#4863B8"></stop><stop offset="1" stop-color="#26397E"></stop></linearGradient>
+</defs>
+<rect width="393" height="852" fill="url(#j3Wall)"></rect>
+<rect x="244" y="150" width="124" height="176" rx="6" fill="url(#j3Sky)"></rect>
+<circle cx="330" cy="250" r="34" fill="#7FA37A"></circle><circle cx="290" cy="270" r="28" fill="#6A8F66"></circle><circle cx="356" cy="290" r="24" fill="#5E8459"></circle>
+<path d="M306 150 V326 M244 238 H368" stroke="#FAF8F4" stroke-width="5"></path>
+<rect x="240" y="146" width="132" height="184" rx="8" fill="none" stroke="#FAF8F4" stroke-width="7"></rect>
+<polygon points="244,326 368,326 260,620 80,620" fill="#FFF3D6" fill-opacity="0.35"></polygon>
+<rect y="530" width="393" height="322" fill="#CFC5B3"></rect>
+<path d="M0 560 H393 M0 610 H393 M80 530 L40 852 M200 530 L200 852 M320 530 L360 852" stroke="#BFB4A0" stroke-width="2"></path>
+<ellipse cx="128" cy="540" rx="96" ry="8" fill="#000000" fill-opacity="0.15"></ellipse>
+<rect x="40" y="330" width="176" height="208" rx="16" fill="url(#j3Body)"></rect>
+<rect x="40" y="330" width="176" height="38" rx="16" fill="#EDEAE4"></rect>
+<rect x="56" y="342" width="52" height="16" rx="4" fill="#2B3159"></rect>
+<text x="82" y="354" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="10" font-weight="800" fill="#7FD39A">30°C</text>
+<circle cx="190" cy="350" r="10" fill="#D6D0C5"></circle><circle cx="190" cy="350" r="4" fill="#BDB6A9"></circle>
+<circle cx="128" cy="452" r="64" fill="#D8D3CA"></circle>
+<circle cx="128" cy="452" r="52" fill="url(#j3Glass)"></circle>
+<path d="M98 470 Q118 420 156 440 Q140 486 104 486 Z" fill="#2C3F8E" fill-opacity="0.85"></path>
+<path d="M100 420 A40 40 0 0 1 150 414" fill="none" stroke="#FFFFFF" stroke-opacity="0.5" stroke-width="4" stroke-linecap="round"></path>
+<path d="M248 540 L292 380 L336 540 M262 486 H322 M254 516 H330" stroke="#B9AE9C" stroke-width="4" fill="none" stroke-linecap="round"></path>
+<g transform="translate(250 384) scale(0.36)"><path d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="url(#j3Shirt)"></path></g>
+</svg>
+
+<svg aria-hidden="true" style="position: absolute; inset: 0; opacity: ${V.jsc.s4}; transition: opacity 0.7s ease" width="393" height="852" viewBox="0 0 393 852">
+<defs>
+<linearGradient id="j4Wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F1E2CB"></stop><stop offset="1" stop-color="#E0CAA8"></stop></linearGradient>
+</defs>
+<rect width="393" height="852" fill="url(#j4Wall)"></rect>
+<path d="M0 166 Q196 214 393 166" fill="none" stroke="#7A6A55" stroke-width="2"></path>
+<g>
+<polygon points="20,172 44,176 30,198" fill="#F4A93B"></polygon><polygon points="58,180 82,185 68,207" fill="#283B8E"></polygon><polygon points="96,187 120,190 106,212" fill="#7FA37A"></polygon><polygon points="134,192 158,194 146,216" fill="#E07A5C"></polygon><polygon points="172,194 196,195 184,218" fill="#F4A93B"></polygon><polygon points="210,195 234,194 222,218" fill="#283B8E"></polygon><polygon points="248,193 272,191 260,215" fill="#7FA37A"></polygon><polygon points="286,189 310,186 298,210" fill="#E07A5C"></polygon><polygon points="324,183 348,179 336,203" fill="#F4A93B"></polygon><polygon points="362,175 386,170 374,194" fill="#283B8E"></polygon>
+</g>
+<rect x="104" y="232" width="185" height="54" rx="12" fill="#283B8E"></rect>
+<text x="196.5" y="262" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="19" font-weight="800" fill="#FFFFFF" letter-spacing="1">TUKAR BAJU</text>
+<text x="196.5" y="278" text-anchor="middle" font-family="Plus Jakarta Sans, sans-serif" font-size="9" font-weight="600" fill="#CBD3F2">pakai ulang · perbaiki · daur ulang</text>
+<rect x="24" y="310" width="345" height="6" rx="3" fill="#8C8C92"></rect>
+<rect x="30" y="310" width="5" height="250" fill="#8C8C92"></rect><rect x="358" y="310" width="5" height="250" fill="#8C8C92"></rect>
+<path transform="translate(40 316) scale(0.36)" d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="#2C3F8E"></path>
+<path transform="translate(92 318) scale(0.34)" d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="#E07A5C"></path>
+<path transform="translate(144 316) scale(0.36)" d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="#7FA37A"></path>
+<path transform="translate(196 318) scale(0.34)" d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="#EADCC2"></path>
+<path transform="translate(248 316) scale(0.36)" d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="#4F6CC4"></path>
+<path transform="translate(298 318) scale(0.24)" d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="#C9A44F"></path>
+<g fill="#FFFFFF" stroke="#7A6A55" stroke-width="1"><rect x="96" y="360" width="14" height="10" rx="2"></rect><rect x="200" y="362" width="14" height="10" rx="2"></rect><rect x="300" y="360" width="14" height="10" rx="2"></rect></g>
+<rect y="540" width="393" height="312" fill="#CDB89A"></rect>
+<rect x="36" y="492" width="200" height="14" rx="4" fill="#A9825A"></rect>
+<rect x="52" y="506" width="8" height="46" fill="#8C6A47"></rect><rect x="212" y="506" width="8" height="46" fill="#8C6A47"></rect>
+<rect x="64" y="472" width="70" height="10" rx="3" fill="#283B8E"></rect><rect x="60" y="482" width="78" height="10" rx="3" fill="#E07A5C"></rect><rect x="150" y="476" width="70" height="16" rx="3" fill="#7FA37A"></rect>
+<rect x="276" y="440" width="76" height="100" rx="10" fill="#3E7F55"></rect>
+<rect x="270" y="432" width="88" height="14" rx="5" fill="#2F6644"></rect>
+<g fill="none" stroke="#FFFFFF" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><path d="M300 470 l10 -14 l10 14"></path><path d="M332 484 l6 16 l-16 2"></path><path d="M300 506 l-10 -12 l4 -14"></path></g>
+</svg>
+
+<div style="position: absolute; inset: 0; background: linear-gradient(180deg, rgba(10, 14, 30, 0.6) 0%, rgba(10, 14, 30, 0) 20%, rgba(10, 14, 30, 0) 52%, rgba(10, 14, 30, 0.82) 76%); pointer-events: none"></div>
+<button onClick="${V.jPrev}" aria-label="Babak sebelumnya" style="position: absolute; left: 0; top: 130px; width: 34%; height: 380px; border: none; background: transparent; cursor: pointer"></button>
+<button onClick="${V.jNext}" aria-label="Babak berikutnya" style="position: absolute; right: 0; top: 130px; width: 34%; height: 380px; border: none; background: transparent; cursor: pointer"></button>
+
+<div style="position: absolute; left: 16px; right: 16px; top: 56px; display: flex; gap: 5px">
+${V.segs.map((g) => html`
+<button onClick="${g.go}" aria-label="${g.aria}" style="flex: 1; height: 22px; padding: 9px 0; border: none; background: transparent; cursor: pointer"><span style="display: block; height: 4px; border-radius: 2px; background: rgba(255, 255, 255, 0.3); overflow: hidden"><span style="display: block; height: 4px; width: ${g.w}; background: #FFFFFF; transition: width 0.2s linear"></span></span></button>
+`)}
+</div>
+<div style="position: absolute; left: 16px; right: 16px; top: 84px; display: flex; align-items: center; gap: 10px">
+<button onClick="${V.backJourney}" aria-label="Tutup Carbon Journey" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: rgba(20, 20, 30, 0.45); backdrop-filter: blur(12px); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+<div style="flex: 1; color: #FFFFFF"><div style="font-size: 14px; font-weight: 800">Carbon Journey</div><div style="font-size: 12px; color: #D4D9EC">Kemeja Oxford Indigo</div></div>
+<button onClick="${V.vr}" aria-label="Mode headset VR" style="height: 44px; padding: 0 14px; border-radius: 22px; border: none; background: rgba(20, 20, 30, 0.45); backdrop-filter: blur(12px); color: #FFFFFF; font-family: inherit; font-size: 12px; font-weight: 800; display: flex; align-items: center; gap: 6px; cursor: pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4A93B" stroke-width="2" stroke-linecap="round"><rect x="2.5" y="7" width="19" height="10" rx="4"></rect><circle cx="8.5" cy="12" r="1.6"></circle><circle cx="15.5" cy="12" r="1.6"></circle></svg>VR</button>
+</div>
+
+<div style="position: absolute; left: ${V.cur.cx}; top: ${V.cur.cy}; padding: 10px 14px; border-radius: 18px 18px 18px 6px; background: rgba(255, 255, 255, 0.94); color: #14171F; box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.55); transition: left 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), top 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)">
+<div style="font-size: 20px; font-weight: 800; line-height: 1.1">${V.cur.kg} kg CO₂e</div>
+<div style="font-size: 12px; font-weight: 600; color: #5D6270">${V.cur.pct} dari total jejak</div>
+</div>
+
+<div style="position: absolute; left: 12px; right: 12px; bottom: 28px; padding: 18px; border-radius: 30px; background: rgba(16, 21, 44, 0.74); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.12); color: #FFFFFF; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; gap: 12px">
+<div style="width: 42px; height: 42px; border-radius: 21px; background: #F4A93B; display: flex; align-items: center; justify-content: center; flex: none"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#14171F" stroke-width="2" stroke-linecap="round"><rect x="7" y="3" width="10" height="18" rx="2"></rect><path d="M7 7.5h10M7 16.5h10M9.5 11l5 1.5M9.5 13l5 1.5"></path></svg></div>
+<div style="min-width: 0"><div style="font-size: 12px; font-weight: 700; color: #C9D0EA">Babak ${V.cur.num} dari 5 · dipandu Si Gulung</div><div style="font-size: 20px; font-weight: 800; letter-spacing: -0.01em">${V.cur.title}</div></div>
+</div>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #E4E8F6; min-height: 63px">${V.cur.text}</p>
+<div style="display: flex; align-items: center; gap: 12px">
+<button onClick="${V.jPrev}" aria-label="Babak sebelumnya" style="width: 46px; height: 46px; border-radius: 23px; border: none; background: rgba(255, 255, 255, 0.12); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h2v14H6zM20 5v14L9 12z"></path></svg></button>
+<button onClick="${V.togglePlay}" aria-label="${V.playLabel}" style="width: 56px; height: 56px; border-radius: 28px; border: none; background: #F4A93B; color: #14171F; display: flex; align-items: center; justify-content: center; cursor: pointer">
+${V.showPause ? html`<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg>` : null}
+${V.showPlay ? html`<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4l13 8-13 8z"></path></svg>` : null}
+</button>
+${V.notLast ? html`<button onClick="${V.jNext}" aria-label="Babak berikutnya" style="width: 46px; height: 46px; border-radius: 23px; border: none; background: rgba(255, 255, 255, 0.12); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M16 5h2v14h-2zM4 5v14l11-7z"></path></svg></button>` : null}
+${V.isLast ? html`<button onClick="${V.journeyToCompare}" style="flex: 1; height: 50px; border-radius: 25px; border: none; background: #FFFFFF; color: #14171F; font-family: inherit; font-size: 14px; font-weight: 800; cursor: pointer">Bandingkan pilihan</button>` : null}
+${V.notLast ? html`<span style="margin-left: auto; font-size: 12px; font-weight: 600; color: #C9D0EA">Ketuk sisi layar untuk pindah</span>` : null}
+</div>
+</div>
+</div>
+
+
+<div style="position: absolute; inset: 0; background: #F7F5F0; overflow: hidden; opacity: ${V.scr.compare.op}; visibility: ${V.scr.compare.vis}; pointer-events: ${V.scr.compare.pe}; transform: ${V.scr.compare.tf}; transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s">
+<div style="position: absolute; left: 16px; right: 16px; top: 56px; display: flex; align-items: center; gap: 12px">
+<button onClick="${V.backCompare}" aria-label="Kembali" style="width: 44px; height: 44px; border-radius: 22px; border: 1px solid #E6E1D8; background: #FFFFFF; color: #14171F; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg></button>
+<div><h1 style="margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.01em">Bandingkan</h1><div style="font-size: 12px; color: #5D6270">Kemeja lengan panjang · ukuran M</div></div>
+</div>
+<div style="position: absolute; left: 0; right: 0; top: 112px; bottom: 104px; overflow-y: auto; scrollbar-width: none; padding: 4px 16px 20px; box-sizing: border-box">
+<div style="display: flex; flex-direction: column; gap: 14px">
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<button onClick="${V.pickOrg}" aria-pressed="${V.cmpOrg.on}" style="position: relative; padding: 8px; border-radius: 22px; border: ${V.cmpOrg.border}; background: #FFFFFF; display: flex; flex-direction: column; gap: 8px; text-align: left; font-family: inherit; color: #14171F; cursor: pointer; transition: border-color 0.2s">
+<div style="height: 140px; border-radius: 16px; background: #E6E9F4; display: flex; align-items: center; justify-content: center">
+<svg aria-hidden="true" width="96" height="112" viewBox="0 0 240 280"><defs><linearGradient id="coG" x1="0" x2="1"><stop offset="0" stop-color="#2A3D86"></stop><stop offset="0.5" stop-color="#4863B8"></stop><stop offset="1" stop-color="#26397E"></stop></linearGradient></defs><path d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="url(#coG)"></path><path d="M82 28 Q120 14 158 28 L162 30 L120 46 L78 30 Z" fill="#1E2C66"></path><path d="M78 30 L120 46 L106 70 L84 54 Z" fill="#3B55A8"></path><path d="M162 30 L120 46 L134 70 L156 54 Z" fill="#3651A2"></path><line x1="120" y1="52" x2="120" y2="266" stroke="#1E2C66" stroke-width="2"></line><path d="M194 112 L192 262 L180 262 L186 120 Z" fill="#000000" fill-opacity="0.13"></path><path d="M46 112 L48 262 L60 262 L54 120 Z" fill="#000000" fill-opacity="0.13"></path></svg>
+</div>
+${V.cmpOrg.on ? html`<span aria-hidden="true" style="position: absolute; right: 14px; top: 14px; width: 28px; height: 28px; border-radius: 14px; background: #283B8E; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></span>` : null}
+<div style="padding: 0 4px 4px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 11px; color: #5D6270">Rupa Tenun</span>
+<span style="font-size: 13px; font-weight: 700">Kemeja Oxford Indigo</span>
+<div style="display: flex; align-items: center; gap: 6px"><span style="width: 24px; height: 24px; border-radius: 8px; background: #3C7F4D; color: #FFFFFF; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center">B</span><span style="font-size: 15px; font-weight: 800">5,5 kg</span></div>
+<span style="font-size: 13px; font-weight: 700; color: #3D4252">Rp 389.000</span>
+</div>
+</button>
+<button onClick="${V.pickPoly}" aria-pressed="${V.cmpPoly.on}" style="position: relative; padding: 8px; border-radius: 22px; border: ${V.cmpPoly.border}; background: #FFFFFF; display: flex; flex-direction: column; gap: 8px; text-align: left; font-family: inherit; color: #14171F; cursor: pointer; transition: border-color 0.2s">
+<div style="height: 140px; border-radius: 16px; background: #F6E5DE; display: flex; align-items: center; justify-content: center">
+<svg aria-hidden="true" width="96" height="112" viewBox="0 0 240 280"><defs><linearGradient id="cpG" x1="0" x2="1"><stop offset="0" stop-color="#C24E37"></stop><stop offset="0.5" stop-color="#E07A5C"></stop><stop offset="1" stop-color="#B54532"></stop></linearGradient><pattern id="cpP" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="2" fill="#FFFFFF" fill-opacity="0.4"></circle><circle cx="12" cy="12" r="1.5" fill="#FFFFFF" fill-opacity="0.3"></circle></pattern></defs><path d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="url(#cpG)"></path><path d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="url(#cpP)"></path><path d="M82 28 Q120 14 158 28 L162 30 L120 46 L78 30 Z" fill="#8E3424"></path><path d="M78 30 L120 46 L106 70 L84 54 Z" fill="#D2624A"></path><path d="M162 30 L120 46 L134 70 L156 54 Z" fill="#C95A43"></path><line x1="120" y1="52" x2="120" y2="266" stroke="#8E3424" stroke-width="2"></line><path d="M194 112 L192 262 L180 262 L186 120 Z" fill="#000000" fill-opacity="0.13"></path><path d="M46 112 L48 262 L60 262 L54 120 Z" fill="#000000" fill-opacity="0.13"></path></svg>
+</div>
+${V.cmpPoly.on ? html`<span aria-hidden="true" style="position: absolute; right: 14px; top: 14px; width: 28px; height: 28px; border-radius: 14px; background: #283B8E; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></span>` : null}
+<div style="padding: 0 4px 4px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 11px; color: #5D6270">FastWear</span>
+<span style="font-size: 13px; font-weight: 700">Kemeja Basic Print</span>
+<div style="display: flex; align-items: center; gap: 6px"><span style="width: 24px; height: 24px; border-radius: 8px; background: #D9703A; color: #FFFFFF; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center">D</span><span style="font-size: 15px; font-weight: 800">9,8 kg</span></div>
+<span style="font-size: 13px; font-weight: 700; color: #3D4252">Rp 159.000</span>
+</div>
+</button>
+</div>
+
+<div style="padding: 14px 16px; border-radius: 20px; background: #E5F0E8; display: flex; gap: 12px; align-items: center">
+<div style="font-size: 30px; font-weight: 800; color: #1D6B3F; letter-spacing: -0.02em">−44%</div>
+<div><div style="font-size: 14px; font-weight: 800; color: #14171F">Oxford Indigo lebih ringan</div><div style="font-size: 12px; color: #2F5D3A">Selisih 4,3 kg CO₂e per kemeja</div></div>
+</div>
+
+<div style="padding: 16px; border-radius: 22px; background: #FFFFFF; border: 1px solid #ECE7DE; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; justify-content: space-between; align-items: center"><h2 style="margin: 0; font-size: 15px; font-weight: 800">Per tahap</h2><div style="display: flex; gap: 10px; font-size: 11px; font-weight: 700; color: #5D6270"><span style="display: flex; align-items: center; gap: 4px"><span style="width: 8px; height: 8px; border-radius: 4px; background: #283B8E"></span>Oxford</span><span style="display: flex; align-items: center; gap: 4px"><span style="width: 8px; height: 8px; border-radius: 4px; background: #E07A5C"></span>Basic Print</span></div></div>
+${V.diff.map((d) => html`
+<div style="display: flex; flex-direction: column; gap: 4px">
+<span style="font-size: 12px; font-weight: 700">${d.name}</span>
+<div style="display: flex; align-items: center; gap: 8px"><div style="flex: 1; height: 8px; border-radius: 4px; background: #F1EEE7"><div style="width: ${d.a}; height: 8px; border-radius: 4px; background: #283B8E"></div></div><span style="width: 40px; text-align: right; font-size: 11px; font-weight: 700">${d.av}</span></div>
+<div style="display: flex; align-items: center; gap: 8px"><div style="flex: 1; height: 8px; border-radius: 4px; background: #F1EEE7"><div style="width: ${d.b}; height: 8px; border-radius: 4px; background: #E07A5C"></div></div><span style="width: 40px; text-align: right; font-size: 11px; font-weight: 700">${d.bv}</span></div>
+</div>
+`)}
+<div style="font-size: 11px; color: #6B707D">Satuan kg CO₂e · data simulasi</div>
+</div>
+
+<div style="display: flex; gap: 10px; align-items: flex-end">
+<div style="width: 36px; height: 36px; border-radius: 18px; background: #F4A93B; flex: none; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#14171F" stroke-width="2" stroke-linecap="round"><rect x="7" y="3" width="10" height="18" rx="2"></rect><path d="M7 7.5h10M7 16.5h10M9.5 11l5 1.5"></path></svg></div>
+<div style="padding: 12px 14px; border-radius: 20px 20px 20px 6px; background: #283B8E; color: #FFFFFF; font-size: 14px; line-height: 1.45">Oxford Indigo memakai kapas organik dan pewarna alami, dan seratnya tidak melepas mikroplastik saat dicuci. <button onClick="${V.openWhy}" style="border: none; background: transparent; padding: 0; color: #F4A93B; font-family: inherit; font-size: 14px; font-weight: 800; text-decoration: underline; cursor: pointer">Kenapa saran ini?</button></div>
+</div>
+</div>
+</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 104px; padding: 12px 16px 32px; box-sizing: border-box; background: rgba(247, 245, 240, 0.95); backdrop-filter: blur(16px); border-top: 1px solid #E6E1D8; display: flex; align-items: center; gap: 12px">
+<div style="flex: 1; min-width: 0"><div style="font-size: 16px; font-weight: 800">${V.pickPrice}</div><div style="font-size: 12px; font-weight: 700; color: ${V.pickHintColor}">${V.pickHint}</div></div>
+<button onClick="${V.buy}" style="height: 56px; padding: 0 22px; border-radius: 28px; border: none; background: #283B8E; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">Beli ${V.pickName}</button>
+</div>
+
+<button onClick="${V.closeSheet}" aria-label="Tutup penjelasan" style="position: absolute; inset: 0; border: none; padding: 0; background: rgba(20, 23, 31, 0.5); opacity: ${V.sh.why.op}; pointer-events: ${V.sh.why.pe}; transition: opacity 0.3s; cursor: pointer"></button>
+<div role="dialog" aria-label="Kenapa saran ini" style="position: absolute; left: 0; right: 0; bottom: 0; background: #F7F5F0; border-radius: 30px 30px 0 0; padding: 10px 20px 34px; box-sizing: border-box; transform: ${V.sh.why.tf}; visibility: ${V.sh.why.vis}; transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1), visibility 0.45s; display: flex; flex-direction: column; gap: 14px">
+<div style="width: 40px; height: 5px; border-radius: 3px; background: #D6D0C5; align-self: center"></div>
+<h2 style="margin: 0; font-size: 20px; font-weight: 800">Kenapa saran ini?</h2>
+<div style="display: flex; gap: 12px"><span style="width: 32px; height: 32px; border-radius: 16px; background: #E8EBF6; color: #283B8E; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; flex: none">1</span><div style="font-size: 14px; line-height: 1.5; color: #3D4252">Dihitung dari data siklus hidup (LCA) kedua kemeja yang sudah diaudit dan tercatat di blockchain.</div></div>
+<div style="display: flex; gap: 12px"><span style="width: 32px; height: 32px; border-radius: 16px; background: #E8EBF6; color: #283B8E; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; flex: none">2</span><div style="font-size: 14px; line-height: 1.5; color: #3D4252">Saran ini tidak berbayar. Jejak Benang tidak menerima imbalan untuk merekomendasikan merek tertentu.</div></div>
+<div style="display: flex; gap: 12px"><span style="width: 32px; height: 32px; border-radius: 16px; background: #E8EBF6; color: #283B8E; font-weight: 800; font-size: 13px; display: flex; align-items: center; justify-content: center; flex: none">3</span><div style="font-size: 14px; line-height: 1.5; color: #3D4252">Keputusan tetap di tanganmu. Kedua kemeja bisa dibeli dari layar ini.</div></div>
+<button onClick="${V.closeSheet}" style="height: 52px; border-radius: 26px; border: none; background: #14171F; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">Mengerti</button>
+</div>
+</div>
+
+
+<div style="position: absolute; inset: 0; background: #F7F5F0; overflow: hidden; opacity: ${V.scr.success.op}; visibility: ${V.scr.success.vis}; pointer-events: ${V.scr.success.pe}; transform: ${V.scr.success.tf}; transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s">
+<div style="position: absolute; left: 0; right: 0; top: 0; bottom: 150px; overflow-y: auto; scrollbar-width: none; padding: 70px 20px 20px; box-sizing: border-box">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center">
+<div style="position: relative; width: 132px; height: 132px; display: flex; align-items: center; justify-content: center">
+<span style="position: absolute; inset: 0; border-radius: 66px; background: ${V.succ.ring}; opacity: 0.12"></span>
+<span style="position: absolute; inset: 16px; border-radius: 50px; background: ${V.succ.ring}; opacity: 0.18"></span>
+<span style="position: relative; width: 72px; height: 72px; border-radius: 36px; background: ${V.succ.ring}; color: #FFFFFF; display: flex; align-items: center; justify-content: center"><svg aria-hidden="true" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg></span>
+</div>
+<h1 style="margin: 0; font-size: 25px; font-weight: 800; letter-spacing: -0.02em">${V.succ.title}</h1>
+<p style="margin: 0; font-size: 14px; line-height: 1.5; color: #5D6270; max-width: 300px">${V.succ.text}</p>
+${V.boughtOrg ? html`
+<div style="width: 100%; padding: 16px; border-radius: 22px; background: linear-gradient(135deg, #F7C26E, #F4A93B); display: flex; align-items: center; gap: 14px; text-align: left; box-sizing: border-box">
+<svg aria-hidden="true" width="48" height="48" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#FFF3DC"></circle><circle cx="12" cy="12" r="8" fill="#E08E25"></circle><circle cx="12" cy="12" r="5.5" fill="none" stroke="#FFF3DC" stroke-width="1.4"></circle><path d="M9.6 12.3l1.7 1.7 3.2-3.6" fill="none" stroke="#FFF3DC" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<div><div style="font-size: 21px; font-weight: 800; color: #14171F">+20 Carbon Points</div><div style="font-size: 13px; color: #4A3410">Saldo sekarang ${V.points} poin</div></div>
+</div>
+<div style="width: 100%; padding: 14px 16px; border-radius: 20px; background: #E5F0E8; display: flex; align-items: center; gap: 12px; text-align: left; box-sizing: border-box"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#1D6B3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-14 15-15-1 10-7 15-15 15z"></path><path d="M5 19l7-7"></path></svg><div style="font-size: 14px; color: #14171F"><b>4,3 kg CO₂e</b> lebih rendah dari kemeja poliester sejenis</div></div>
+` : null}
+${V.boughtPoly ? html`
+<div style="width: 100%; padding: 16px; border-radius: 22px; background: #FFFFFF; border: 1px solid #ECE7DE; display: flex; flex-direction: column; gap: 10px; text-align: left; box-sizing: border-box">
+<div style="font-size: 14px; font-weight: 800">Kecilkan jejaknya di rumah</div>
+<div style="font-size: 13px; line-height: 1.5; color: #3D4252">Cuci dengan air dingin, pakai kantong cuci penangkap mikroplastik, dan kembalikan lewat program tukar baju saat tidak dipakai lagi.</div>
+</div>
+` : null}
+<div style="width: 100%; padding: 12px; border-radius: 20px; background: #FFFFFF; border: 1px solid #ECE7DE; display: flex; align-items: center; gap: 12px; text-align: left; box-sizing: border-box">
+<div style="width: 52px; height: 52px; border-radius: 14px; background: ${V.succ.thumbBg}; display: flex; align-items: center; justify-content: center; flex: none"><svg aria-hidden="true" width="36" height="42" viewBox="0 0 240 280"><path d="M78 30 L120 46 L162 30 L206 50 Q222 58 226 76 L238 196 Q239 206 229 208 L212 210 Q204 210 203 202 L194 112 L192 262 Q120 274 48 262 L46 112 L37 202 Q36 210 28 210 L11 208 Q1 206 2 196 L14 76 Q18 58 34 50 Z" fill="${V.succ.shirt}"></path></svg></div>
+<div style="flex: 1; min-width: 0"><div style="font-size: 14px; font-weight: 800">${V.succ.product}</div><div style="font-size: 12px; color: #5D6270">${V.succ.ship}</div></div>
+<span style="font-size: 14px; font-weight: 800">${V.succ.price}</span>
+</div>
+<div style="width: 100%; padding: 12px 14px; border-radius: 20px; background: #FFFFFF; border: 1px solid #ECE7DE; display: flex; align-items: center; gap: 12px; text-align: left; box-sizing: border-box">
+<div style="flex: 1; font-size: 13px; font-weight: 700">Ingatkan aku ikut program tukar baju</div>
+<button onClick="${V.toggleRemind}" role="switch" aria-checked="${V.remind}" aria-label="Pengingat tukar baju" style="position: relative; width: 52px; height: 32px; border-radius: 16px; border: none; background: ${V.sw.bg}; cursor: pointer; transition: background 0.25s; flex: none"><span style="position: absolute; left: 3px; top: 3px; width: 26px; height: 26px; border-radius: 13px; background: #FFFFFF; transform: ${V.sw.tf}; transition: transform 0.25s; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2)"></span></button>
+</div>
+</div>
+</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 12px 20px 34px; box-sizing: border-box; display: flex; flex-direction: column; gap: 8px; background: #F7F5F0">
+<button onClick="${V.goImpact}" style="height: 56px; border-radius: 28px; border: none; background: #283B8E; color: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 800; cursor: pointer">Lihat dampakku</button>
+<button onClick="${V.goHome}" style="height: 46px; border: none; background: transparent; font-family: inherit; font-size: 14px; font-weight: 700; color: #3D4252; cursor: pointer">Kembali ke beranda</button>
+</div>
+</div>
+
+
+<div style="position: absolute; inset: 0; background: #F7F5F0; overflow: hidden; opacity: ${V.scr.impact.op}; visibility: ${V.scr.impact.vis}; pointer-events: ${V.scr.impact.pe}; transform: ${V.scr.impact.tf}; transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s">
+<div style="position: absolute; left: 0; right: 0; top: 0; bottom: 84px; overflow-y: auto; scrollbar-width: none; padding: 60px 20px 24px; box-sizing: border-box">
+<div style="display: flex; flex-direction: column; gap: 16px">
+<div><h1 style="margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.02em">Dampakku</h1><div style="font-size: 13px; color: #5D6270">Nadia · bergabung sejak 2034</div></div>
+<div style="position: relative; overflow: hidden; padding: 18px; border-radius: 26px; background: linear-gradient(135deg, #18235F 0%, #283B8E 60%, #3C58BC 100%); color: #FFFFFF; display: flex; flex-direction: column; gap: 12px">
+<svg aria-hidden="true" style="position: absolute; right: -30px; top: -30px" width="160" height="160" viewBox="0 0 160 160"><circle cx="80" cy="80" r="70" fill="none" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="20"></circle></svg>
+<div style="font-size: 12px; font-weight: 700; color: #CBD3F2">CARBON POINTS</div>
+<div style="display: flex; align-items: baseline; gap: 8px"><span style="font-size: 40px; font-weight: 800; letter-spacing: -0.03em; line-height: 1">${V.points}</span><span style="font-size: 14px; color: #CBD3F2">poin</span></div>
+<div style="height: 8px; border-radius: 4px; background: rgba(255, 255, 255, 0.18); overflow: hidden"><div style="height: 8px; width: ${V.nextPct}; background: #F4A93B; border-radius: 4px; transition: width 0.5s"></div></div>
+<div style="font-size: 12px; color: #DDE2F6">${V.nextText}</div>
+<div style="height: 1px; background: rgba(255, 255, 255, 0.14)"></div>
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+<div><div style="font-size: 19px; font-weight: 800">${V.savedText} kg</div><div style="font-size: 11px; color: #CBD3F2">CO₂e dihindari</div></div>
+<div><div style="font-size: 19px; font-weight: 800">${V.scans}</div><div style="font-size: 11px; color: #CBD3F2">pemindaian</div></div>
+<div><div style="font-size: 19px; font-weight: 800">${V.journeys}</div><div style="font-size: 11px; color: #CBD3F2">perjalanan VR</div></div>
+</div>
+</div>
+
+<h2 style="margin: 4px 0 0; font-size: 17px; font-weight: 800">Tukar poin</h2>
+<div style="display: flex; flex-direction: column; gap: 8px">
+${V.rewards.map((r) => html`
+<div style="padding: 12px; border-radius: 20px; background: #FFFFFF; border: 1px solid #ECE7DE; display: flex; align-items: center; gap: 12px">
+<div style="width: 44px; height: 44px; border-radius: 14px; background: ${r.tint}; color: ${r.ink}; font-size: 18px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex: none">${r.letter}</div>
+<div style="flex: 1; min-width: 0"><div style="font-size: 14px; font-weight: 800">${r.title}</div><div style="font-size: 12px; color: #5D6270">${r.sub}</div></div>
+<button onClick="${r.redeem}" style="height: 38px; padding: 0 14px; border-radius: 19px; border: none; background: ${r.btnBg}; color: ${r.btnFg}; font-family: inherit; font-size: 12px; font-weight: 800; white-space: nowrap; cursor: pointer">${r.label}</button>
+</div>
+`)}
+</div>
+
+<h2 style="margin: 4px 0 0; font-size: 17px; font-weight: 800">Aktivitas terbaru</h2>
+${V.noHistory ? html`<div style="padding: 18px; border-radius: 20px; border: 1.5px dashed #D6D0C5; font-size: 13px; color: #5D6270; text-align: center">Belum ada aktivitas. Coba pindai pakaian pertamamu.</div>` : null}
+${V.hasHistory ? html`
+<div style="padding: 4px 14px; border-radius: 20px; background: #FFFFFF; border: 1px solid #ECE7DE">
+${V.hist.map((h) => html`
+<div style="min-height: 56px; display: flex; align-items: center; gap: 12px; border-bottom: ${h.line}">
+<span style="width: 10px; height: 10px; border-radius: 5px; background: ${h.dot}; flex: none"></span>
+<div style="flex: 1; min-width: 0"><div style="font-size: 13px; font-weight: 700">${h.t}</div><div style="font-size: 12px; color: #5D6270">${h.s}</div></div>
+<span style="font-size: 13px; font-weight: 800; color: ${h.pc}">${h.p}</span>
+</div>
+`)}
+</div>
+` : null}
+
+<button onClick="${V.goBrand}" style="padding: 16px; border-radius: 22px; border: none; background: #14171F; color: #FFFFFF; display: flex; align-items: center; gap: 12px; text-align: left; font-family: inherit; cursor: pointer">
+<div style="width: 44px; height: 44px; border-radius: 14px; background: #2A2F3D; color: #F4A93B; display: flex; align-items: center; justify-content: center; flex: none"><svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"></path></svg></div>
+<div style="flex: 1"><div style="font-size: 12px; color: #B8BDCB">Punya merek fashion?</div><div style="font-size: 15px; font-weight: 800">Buka Jejak Benang Bisnis</div></div>
+<svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#B8BDCB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+</div>
+</div>
+
+<nav aria-label="Menu utama" style="position: absolute; left: 0; right: 0; bottom: 0; height: 84px; background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(16px); border-top: 1px solid #ECE7DE; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding-bottom: 22px; box-sizing: border-box">
+<button onClick="${V.goHome}" style="border: none; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-family: inherit; font-size: 11px; font-weight: 600; color: #5D6270; cursor: pointer"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 10.5L12 3l9 7.5V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"></path></svg>Beranda</button>
+<div style="display: flex; justify-content: center"><button onClick="${V.goScan}" aria-label="Pindai" style="margin-top: -22px; width: 62px; height: 62px; border-radius: 31px; border: 4px solid #F7F5F0; background: #283B8E; color: #FFFFFF; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px -8px rgba(40, 59, 142, 0.7); cursor: pointer"><svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 8V6a2 2 0 012-2h2M16 4h2a2 2 0 012 2v2M20 16v2a2 2 0 01-2 2h-2M8 20H6a2 2 0 01-2-2v-2M7 12h10"></path></svg></button></div>
+<button aria-current="page" style="border: none; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-family: inherit; font-size: 11px; font-weight: 800; color: #283B8E; cursor: pointer"><svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M5 19c0-8 5-14 15-15-1 10-7 15-15 15z"></path></svg>Dampak</button>
+</nav>
+</div>
+
+
+<div style="position: absolute; inset: 0; background: #F2F0EB; overflow: hidden; opacity: ${V.scr.brand.op}; visibility: ${V.scr.brand.vis}; pointer-events: ${V.scr.brand.pe}; transform: ${V.scr.brand.tf}; transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s">
+<div style="position: absolute; inset: 0; overflow-y: auto; scrollbar-width: none">
+<div style="padding: 58px 20px 70px; border-radius: 0 0 32px 32px; background: linear-gradient(160deg, #14171F 0%, #1B2766 100%); color: #FFFFFF">
+<div style="display: flex; align-items: center; gap: 12px">
+<button onClick="${V.goImpact}" aria-label="Kembali ke Dampakku" style="width: 44px; height: 44px; border-radius: 22px; border: none; background: rgba(255, 255, 255, 0.12); color: #FFFFFF; display: flex; align-items: center; justify-content: center; cursor: pointer"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6l-6 6 6 6"></path></svg></button>
+<div style="flex: 1"><div style="font-size: 12px; color: #B8C0DE">Rupa Tenun · Bisnis</div><div style="font-size: 22px; font-weight: 800; letter-spacing: -0.01em">Dasbor dampak</div></div>
+<span style="padding: 6px 10px; border-radius: 999px; background: rgba(255, 255, 255, 0.12); font-size: 11px; font-weight: 700">Data simulasi</span>
+</div>
+</div>
+<div style="margin: -50px 16px 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+<div style="padding: 14px; border-radius: 20px; background: #FFFFFF"><div style="font-size: 12px; color: #5D6270">Pemindaian AR</div><div style="font-size: 24px; font-weight: 800; letter-spacing: -0.02em">${V.scanTotal}</div><div style="font-size: 12px; font-weight: 700; color: #1D6B3F">+${V.scans} dari sesi ini</div></div>
+<div style="padding: 14px; border-radius: 20px; background: #FFFFFF"><div style="font-size: 12px; color: #5D6270">Konversi setelah pindai</div><div style="font-size: 24px; font-weight: 800; letter-spacing: -0.02em">31%</div><div style="font-size: 12px; color: #5D6270">tanpa pindai 19%</div></div>
+<div style="padding: 14px; border-radius: 20px; background: #FFFFFF"><div style="font-size: 12px; color: #5D6270">Pilih Oxford Indigo</div><div style="font-size: 24px; font-weight: 800; letter-spacing: -0.02em">${V.orgTotal}</div><div style="font-size: 12px; font-weight: 700; color: #1D6B3F">+${V.orgBuys} dari sesi ini</div></div>
+<div style="padding: 14px; border-radius: 20px; background: #FFFFFF"><div style="font-size: 12px; color: #5D6270">Selesai Carbon Journey</div><div style="font-size: 24px; font-weight: 800; letter-spacing: -0.02em">${V.journeyTotal}</div><div style="font-size: 12px; color: #5D6270">rata-rata 2 mnt 10 dtk</div></div>
+</div>
+<div style="padding: 14px 16px 34px; display: flex; flex-direction: column; gap: 12px">
+<div style="padding: 16px; border-radius: 22px; background: #FFFFFF; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-size: 15px; font-weight: 800">Babak paling lama ditonton</h2><span style="font-size: 11px; color: #5D6270">detik per sesi</span></div>
+${V.chRows.map((k) => html`
+<div style="display: grid; grid-template-columns: 96px 1fr 30px; align-items: center; gap: 8px; font-size: 12px">
+<span style="display: flex; align-items: center; gap: 5px">${k.n}${k.you ? html`<span style="width: 6px; height: 6px; border-radius: 3px; background: #F4A93B"></span>` : null}</span>
+<div style="height: 10px; border-radius: 5px; background: #F1EEE7"><div style="height: 10px; width: ${k.w}; border-radius: 5px; background: #283B8E"></div></div>
+<span style="text-align: right; font-weight: 800">${k.sec}</span>
+</div>
+`)}
+<div style="display: flex; align-items: center; gap: 6px; font-size: 11px; color: #5D6270"><span style="width: 6px; height: 6px; border-radius: 3px; background: #F4A93B"></span>babak yang kamu tonton di sesi ini</div>
+</div>
+<div style="padding: 16px; border-radius: 22px; background: #14171F; color: #FFFFFF; display: flex; flex-direction: column; gap: 12px">
+<h2 style="margin: 0; font-size: 15px; font-weight: 800">Simulasi: bagaimana jika…</h2>
+<div style="display: flex; gap: 8px; flex-wrap: wrap">
+${V.sim.map((o) => html`<button onClick="${o.toggle}" aria-pressed="${o.on}" style="min-height: 38px; padding: 0 14px; border-radius: 19px; border: ${o.border}; background: ${o.bg}; color: ${o.fg}; font-family: inherit; font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s">${o.label}</button>`)}
+</div>
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="width: 40px; height: 40px; border-radius: 12px; background: #3C7F4D; font-size: 19px; font-weight: 800; display: flex; align-items: center; justify-content: center">B</span>
+<svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F4A93B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+<span style="width: 40px; height: 40px; border-radius: 12px; background: ${V.simGradeBg}; font-size: 19px; font-weight: 800; display: flex; align-items: center; justify-content: center; transition: background 0.3s">${V.simGrade}</span>
+<div style="font-size: 13px; line-height: 1.35; color: #D6D9E6">Perkiraan<br/><b style="color: #FFFFFF">5,5 → ${V.simKg} kg CO₂e</b></div>
+</div>
+${V.auditOpen ? html`<button onClick="${V.sendAudit}" style="height: 46px; border-radius: 23px; border: none; background: ${V.auditBg}; color: #14171F; font-family: inherit; font-size: 13px; font-weight: 800; cursor: pointer">${V.auditLabel}</button>` : null}
+${V.auditSent ? html`<div role="status" style="height: 46px; border-radius: 23px; background: #1D6B3F; color: #E5F0E8; font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center; gap: 8px"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10"></path></svg>Audit diajukan · menunggu verifikator</div>` : null}
+</div>
+<div style="padding: 4px 16px; border-radius: 22px; background: #FFFFFF">
+<div style="min-height: 56px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #F1EEE7"><span style="width: 30px; height: 30px; border-radius: 10px; background: #3C7F4D; color: #FFFFFF; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center">B</span><span style="flex: 1; font-size: 13px; font-weight: 700">Kemeja Oxford Indigo</span><span style="font-size: 12px; font-weight: 800; color: #1D6B3F">Terverifikasi</span></div>
+<div style="min-height: 56px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #F1EEE7"><span style="width: 30px; height: 30px; border-radius: 10px; background: #1D6B3F; color: #FFFFFF; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center">A</span><span style="flex: 1; font-size: 13px; font-weight: 700">Kemeja Linen Alam</span><span style="font-size: 12px; font-weight: 800; color: #1D6B3F">Terverifikasi</span></div>
+<div style="min-height: 56px; display: flex; align-items: center; gap: 12px"><span style="width: 30px; height: 30px; border-radius: 10px; background: #E2B33C; color: #14171F; font-size: 14px; font-weight: 800; display: flex; align-items: center; justify-content: center">C</span><span style="flex: 1; font-size: 13px; font-weight: 700">Outer Tenun Gelap</span><span style="font-size: 12px; font-weight: 800; color: #9A5A12">Menunggu audit</span></div>
+</div>
+</div>
+</div>
+</div>
+
+
+<div role="status" style="position: absolute; left: 20px; right: 20px; top: 112px; display: flex; justify-content: center; pointer-events: none; z-index: 40; opacity: ${V.toast.op}; transform: ${V.toast.tf}; transition: opacity 0.3s, transform 0.3s"><span style="padding: 12px 16px; border-radius: 16px; background: rgba(20, 23, 31, 0.92); color: #FFFFFF; font-size: 13px; font-weight: 700; text-align: center; box-shadow: 0 12px 24px -12px rgba(0, 0, 0, 0.5)">${V.toast.text}</span></div>
+<div aria-hidden="true" style="position: absolute; left: 134px; top: 11px; width: 125px; height: 37px; border-radius: 20px; background: #000000; z-index: 50"></div>
+<div aria-hidden="true" style="position: absolute; left: 129px; bottom: 8px; width: 135px; height: 5px; border-radius: 3px; background: ${V.homeBar}; z-index: 50; transition: background 0.3s"></div>
+</div>
+</div>
+</div>
+</div>`;
+}
+}
+const params = new URLSearchParams(location.search);
+render(html`<${App} start=${params.get('start') || 'home'} />`, document.getElementById('app'));
+function fit() {
+  const s = Math.min(window.innerWidth / 460, (window.innerHeight - 8) / 940, 1.15);
+  document.getElementById('fit').style.transform = 'scale(' + s + ')';
+}
+window.addEventListener('resize', fit);
+fit();
+</script>
+</body>
+</html>
